@@ -4,10 +4,17 @@ import {
   createMuiTheme,
   MuiThemeProvider,
 } from '@material-ui/core/styles';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import Input from '@material-ui/core/Input';
+import Checkbox from '@material-ui/core/Checkbox';
+import ListItemText from '@material-ui/core/ListItemText';
 import MaterialTable, { Column } from 'material-table';
 import Chip from '@material-ui/core/Chip';
 
-import { Group } from '~/@types/Session';
+import { Group, City } from '~/@types/Session';
 import api from '~/services/api';
 
 interface GroupsProps {
@@ -48,10 +55,15 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
   });
 
   const [data, setData] = useState<Group[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
 
   useEffect(() => {
     api.get<Group[]>('groups').then(response => {
       setData(response.data);
+    });
+
+    api.get<City[]>('cities').then(response => {
+      setCities(response.data);
     });
   }, []);
 
@@ -61,14 +73,64 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
       {
         title: 'Cidades',
         field: 'cities',
-        editComponent: () => <span>TO-DO</span>,
+        editComponent: ({ value, onChange }) => {
+          const selected = (value as City[]).map(city => city.id);
+
+          return (
+            <FormControl>
+              <InputLabel id="cities-select-label">Cidades</InputLabel>
+              <Select
+                labelId="cities-select-label"
+                id="demo-mutiple-checkbox"
+                multiple
+                value={selected}
+                onChange={event => {
+                  const dataUpdate: City[] = [];
+
+                  (event.target.value as string[]).forEach(cityId => {
+                    const city = cities.find(el => el.id === cityId);
+
+                    if (city) dataUpdate.push(city);
+                  });
+
+                  onChange([...dataUpdate]);
+                }}
+                input={<Input />}
+                renderValue={() => {
+                  const cityNames = selected.map(cityId => {
+                    const city = cities.find(el => el.id === cityId);
+
+                    return city ? city.name : 'NOT_FOUND';
+                  });
+
+                  return cityNames.join(', ');
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 48 * 4.5 + 8,
+                      width: 250,
+                    },
+                  },
+                }}
+              >
+                {cities.map(city => (
+                  <MenuItem key={city.id} value={city.id}>
+                    <Checkbox checked={selected.includes(city.id)} />
+                    <ListItemText primary={`${city.name} / ${city.uf}`} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          );
+        },
         render: row =>
           row.cities.map(city => (
             <Chip label={`${city.name} / ${city.uf}`} color="secondary" />
           )),
       },
     ],
-    [],
+    [cities],
   );
 
   return (
@@ -85,6 +147,7 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
             actions: 'Ações',
           },
           body: {
+            emptyDataSourceMessage: 'Nenhum grupo',
             addTooltip: 'Criar novo grupo',
             editTooltip: 'Editar',
             deleteTooltip: 'Deletar',
@@ -99,37 +162,36 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
         editable={{
           onRowAdd: newData =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // setData([...data, newData]);
+              setData([...data, newData]);
 
-                resolve();
-              }, 1000);
+              resolve();
             }),
           onRowUpdate: (newData, oldData) =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // const dataUpdate = [...data];
+              if (!oldData) {
+                reject();
+                return;
+              }
 
-                // const index = oldData.tableData.id;
-                // dataUpdate[index] = newData;
+              const dataUpdate = [...data];
 
-                // setData([...dataUpdate]);
+              const index = data.findIndex(el => el.id === oldData.id);
+              dataUpdate[index] = newData;
 
-                resolve();
-              }, 1000);
+              setData([...dataUpdate]);
+
+              resolve();
             }),
           onRowDelete: oldData =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // const dataDelete = [...data];
+              const dataDelete = [...data];
 
-                // const index = oldData.tableData.id;
-                // dataDelete.splice(index, 1);
+              const index = data.findIndex(el => el.id === oldData.id);
+              dataDelete.splice(index, 1);
 
-                // setData([...dataDelete]);
+              setData([...dataDelete]);
 
-                resolve();
-              }, 1000);
+              resolve();
             }),
         }}
         options={{

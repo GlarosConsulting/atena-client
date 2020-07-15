@@ -53,7 +53,7 @@ const Users: React.FC<UsersProps> = ({ ...rest }) => {
       username: 'testing',
       email: 'test@test.com',
       group: {
-        id: '4e8bc68b-47d2-4401-b92b-d9711ff68782',
+        id: 'e3fb18a9-9156-4e35-a094-a11a22662d6f',
         name: 'Test',
         cities: [
           {
@@ -104,6 +104,7 @@ const Users: React.FC<UsersProps> = ({ ...rest }) => {
             actions: 'Ações',
           },
           body: {
+            emptyDataSourceMessage: 'Nenhum usuário',
             addTooltip: 'Adicionar novo usuário',
             editTooltip: 'Editar',
             deleteTooltip: 'Deletar',
@@ -118,37 +119,36 @@ const Users: React.FC<UsersProps> = ({ ...rest }) => {
         editable={{
           onRowAdd: newData =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // setData([...data, newData]);
+              setData([...data, newData]);
 
-                resolve();
-              }, 1000);
+              resolve();
             }),
           onRowUpdate: (newData, oldData) =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // const dataUpdate = [...data];
+              if (!oldData) {
+                reject();
+                return;
+              }
 
-                // const index = oldData.tableData.id;
-                // dataUpdate[index] = newData;
+              const dataUpdate = [...data];
 
-                // setData([...dataUpdate]);
+              const index = data.findIndex(el => el.id === oldData.id);
+              dataUpdate[index] = newData;
 
-                resolve();
-              }, 1000);
+              setData([...dataUpdate]);
+
+              resolve();
             }),
           onRowDelete: oldData =>
             new Promise((resolve, reject) => {
-              setTimeout(() => {
-                // const dataDelete = [...data];
+              const newData = [...data];
 
-                // const index = oldData.tableData.id;
-                // dataDelete.splice(index, 1);
+              const index = data.findIndex(el => el.id === oldData.id);
+              newData.splice(index, 1);
 
-                // setData([...dataDelete]);
+              setData([...newData]);
 
-                resolve();
-              }, 1000);
+              resolve();
             }),
         }}
         options={{
