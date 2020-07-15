@@ -3,8 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import capitalize from 'capitalize';
 import Grid from '@material-ui/core/Grid';
 
-import Statistics from '~/typings/Statistics';
-import Agreement from '~/typings/Agreement';
+import Statistics from '~/@types/Statistics';
+import Agreement from '~/@types/Agreement';
 
 import api from '~/services/api';
 import getRandomArbitrary from '~/utils/getRandomArbitrary';

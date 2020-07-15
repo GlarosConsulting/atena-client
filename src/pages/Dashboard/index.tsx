@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import classNames from 'classnames';
 import subDays from 'date-fns/subDays';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
-import { DateRange } from '@material-ui/pickers/DateRangePicker/RangeTypes';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+import ButtonBase from '@material-ui/core/ButtonBase';
+import { DateRangePicker, DateRange } from '@material-ui/pickers';
+import DateFnsAdapter from '@material-ui/pickers/adapter/date-fns';
+import ptBrLocale from 'date-fns/locale/pt-BR';
+import { FiArrowRight } from 'react-icons/fi';
+import { FaSearch } from 'react-icons/fa';
 
-import Statistics from '~/typings/Statistics';
-import Agreement from '~/typings/Agreement';
+import Statistics from '~/@types/Statistics';
+import Agreement from '~/@types/Agreement';
 
 import api from '~/services/api';
 
@@ -19,7 +31,28 @@ interface AgreementsResponse {
   agreements: Agreement[];
 }
 
+const useStyles = makeStyles(theme => ({
+  fieldResponsiveContainer: {
+    [theme.breakpoints.only('xs')]: {
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    [theme.breakpoints.up('sm')]: {
+      marginTop: 0,
+    },
+  },
+  citySelectFormControl: {
+    width: 150,
+    minWidth: 130,
+  },
+  dateRangeInputField: {
+    maxWidth: 150,
+  },
+}));
+
 const Dashboard: React.FC = () => {
+  const classes = useStyles();
+
   const [city, setCity] = useState('');
   const [date, setDate] = useState<DateRange>([
     subDays(new Date(), 1),
@@ -52,16 +85,95 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     handleSearch();
-    // eslint-disable-next-line
-  }, []);
+  }, []); // eslint-disable-line
 
   return (
     <>
-      <Header
-        onCityChange={(value): void => setCity(value)}
-        onDateChange={(value): void => setDate(value)}
-        onSearch={handleSearch}
-      />
+      <Header>
+        <Box
+          display="flex"
+          flexDirection={{ xs: 'column', sm: 'row' }}
+          alignItems="center"
+        >
+          <FormControl
+            className={classNames(
+              classes.citySelectFormControl,
+              classes.fieldResponsiveContainer,
+            )}
+            variant="outlined"
+          >
+            <InputLabel id="city-select-label">Municípios</InputLabel>
+            <Select
+              labelId="city-select-label"
+              id="city-select"
+              value={city}
+              onChange={(event): void => setCity(event.target.value as string)}
+              label="Municípios"
+            >
+              <MenuItem value="">
+                <em>Todos</em>
+              </MenuItem>
+              <MenuItem value="Agua Branca">Agua Branca</MenuItem>
+              <MenuItem value="Anadia">Anadia</MenuItem>
+              <MenuItem value="Arapiraca">Arapiraca</MenuItem>
+              <MenuItem value="Atalaia">Atalaia</MenuItem>
+              <MenuItem value="Barra de Santo Antonio">
+                Barra de Santo Antonio
+              </MenuItem>
+              <MenuItem value="Barra de São Miguel">
+                Barra de São Miguel
+              </MenuItem>
+              <MenuItem value="Batalha">Batalha</MenuItem>
+              <MenuItem value="Belem">Belem</MenuItem>
+              <MenuItem value="Belo Monte">Belo Monte</MenuItem>
+              <MenuItem value="Boca da Mata">Boca da Mata</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box
+            bgcolor="#707070"
+            height={25}
+            width={3}
+            borderRadius={50}
+            marginX={2.5}
+            display={{ xs: 'none', sm: 'block' }}
+          />
+
+          <DateRangePicker
+            startText="Início"
+            endText="Fim"
+            value={date}
+            dateAdapter={new DateFnsAdapter({ locale: ptBrLocale })}
+            renderInput={(startProps, endProps): React.ReactElement => (
+              <Box
+                className={classes.fieldResponsiveContainer}
+                display="flex"
+                alignItems="center"
+              >
+                <TextField
+                  className={classes.dateRangeInputField}
+                  {...startProps}
+                  helperText=""
+                />
+                <FiArrowRight size={25} style={{ margin: '0 10px' }} />
+                <TextField
+                  className={classes.dateRangeInputField}
+                  {...endProps}
+                  helperText=""
+                />
+              </Box>
+            )}
+            onChange={(value): void => setDate(value)}
+          />
+
+          <ButtonBase
+            onClick={handleSearch}
+            style={{ borderRadius: '50%', padding: 10, marginLeft: 20 }}
+          >
+            <FaSearch size={20} />
+          </ButtonBase>
+        </Box>
+      </Header>
 
       <Container maxWidth="lg">
         <Box marginTop={2.5} marginBottom={2}>

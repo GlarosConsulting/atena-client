@@ -124,6 +124,14 @@ let theme = createMuiTheme({
       barColorPrimary: {
         backgroundColor: '#606060',
       },
+    },
+    MuiButton: {
+      contained: {
+        backgroundColor: '#AAA',
+        '&:hover': {
+          backgroundColor: '#BBB',
+        }
+      },
     }
   },
 });

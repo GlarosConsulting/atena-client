@@ -1,17 +1,20 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState } from 'react';
+import { makeStyles, darken } from '@material-ui/core/styles';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import Paper from '@material-ui/core/Paper';
+import Collapse from '@material-ui/core/Collapse';
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 
-import Agreement from '~/typings/Agreement';
+import Agreement from '~/@types/Agreement';
 
 import getTimeZone from '~/utils/getTimeZone';
 
 import Dialog from '~/components/Dialog';
 import DialogTitle from '~/components/Dialog/Title';
 import DialogContent from '~/components/Dialog/Content';
+import Text from '~/components/Text';
 
 import Label from './Label';
 
@@ -22,13 +25,25 @@ interface InfoDialogProps {
 }
 
 const useStyles = makeStyles(theme => ({
-  summary: {
-    padding: theme.spacing(2, 2.5),
+  tabsContainer: {
+    borderRadius: 5,
+  },
+  collapseContainer: {
     backgroundColor: theme.palette.primary.light,
+    borderRadius: 8,
+    padding: theme.spacing(1, 2),
+    '&:not(:last-child)': {
+      marginBottom: 10,
+    },
+  },
+  expandButton: {
+    // color: '#303030',
+    // padding: 5,
+    padding: theme.spacing(0.65, 1.25),
+    backgroundColor: darken(theme.palette.primary.light, 0.1),
     borderRadius: 10,
-    fontSize: 16,
-    color: '#505050',
-    marginBottom: theme.spacing(2),
+    fontSize: 12,
+    color: darken(theme.palette.primary.light, 0.65),
   },
 }));
 
@@ -39,79 +54,314 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
 }) => {
   const classes = useStyles();
 
+  const [expanded, setExpanded] = useState<string | null>();
+
   return agreement ? (
     <Dialog open={open} responsive maxWidth="sm" fullWidth onClose={onClose}>
       <DialogTitle onClose={onClose}>Informações</DialogTitle>
       <DialogContent dividers>
-        <Paper className={classes.summary} elevation={2}>
-          {`Convênio: ${agreement.agreementId}`}
+        <Paper className={classes.collapseContainer}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width={1}
+          >
+            <Text fontSize={18} fontWeight={400}>
+              Celebração
+            </Text>
+
+            <Button
+              className={classes.expandButton}
+              variant="contained"
+              disableElevation
+              onClick={(): void =>
+                expanded !== 'celebration'
+                  ? setExpanded('celebration')
+                  : setExpanded(null)
+              }
+            >
+              {expanded === 'celebration' ? 'Mostrar menos' : 'Mostrar mais'}
+            </Button>
+
+            {/* <IconButton
+              aria-label="close"
+              className={classes.expandButton}
+              onClick={(): void =>
+                expanded !== 'celebration'
+                  ? setExpanded('celebration')
+                  : setExpanded(null)
+              }
+            >
+              <FiChevronDown
+                size={23}
+                strokeWidth={4}
+                style={{
+                  transition: 'all 200ms',
+                  transform:
+                    expanded === 'celebration'
+                      ? 'rotate(180deg)'
+                      : 'rotate(0deg)',
+                }}
+              />
+            </IconButton> */}
+          </Box>
+
+          <Collapse
+            in={expanded === 'celebration'}
+            collapsedHeight={60}
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Label title="Número do convênio" value={agreement.agreementId} />
+            <Label
+              title="Modalidade"
+              value={agreement.proposalData.data.modality}
+            />
+            <Label
+              title="Número do processo"
+              value={agreement.proposalData.data.proccessId}
+            />
+            <Label
+              title="Número do edital"
+              value={agreement.proposalData.data.proposalId}
+            />
+            <Label
+              title="Data de publicação"
+              value={format(
+                utcToZonedTime(
+                  agreement.proposalData.data.proposalDate,
+                  getTimeZone(),
+                ),
+                'dd/MM/yyyy',
+              )}
+            />
+            <Label
+              title="Data de licitação"
+              value={format(
+                utcToZonedTime(
+                  agreement.proposalData.data.biddingDate,
+                  getTimeZone(),
+                ),
+                'dd/MM/yyyy',
+              )}
+            />
+            <Label
+              title="Data de homologação"
+              value={format(
+                utcToZonedTime(
+                  agreement.proposalData.data.homologationDate,
+                  getTimeZone(),
+                ),
+                'dd/MM/yyyy',
+              )}
+            />
+            <Label
+              title="Referência legal"
+              value={agreement.proposalData.data.legalFoundation}
+            />
+            <Label
+              title="Valor"
+              value={Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(
+                agreement.proposalData.programs.reduce(
+                  (accumulator, program) => accumulator + program.value,
+                  0,
+                ),
+              )}
+            />
+            <Label
+              title="Descrição"
+              value={agreement.proposalData.data.description}
+            />
+            <Label title="Objeto" value={agreement.proposalData.data.object} />
+          </Collapse>
         </Paper>
 
-        <Box marginLeft={0.5}>
-          <Label
-            title="Modalidade"
-            value={agreement.proposalData.data.modality}
-          />
-          <Label
-            title="Número do processo"
-            value={agreement.proposalData.data.proccessId}
-          />
-          <Label
-            title="Número do edital"
-            value={agreement.proposalData.data.proposalId}
-          />
-          <Label
-            title="Data de publicação"
-            value={format(
-              utcToZonedTime(
-                agreement.proposalData.data.proposalDate,
-                getTimeZone(),
-              ),
-              'dd/MM/yyyy',
-            )}
-          />
-          <Label
-            title="Data de licitação"
-            value={format(
-              utcToZonedTime(
-                agreement.proposalData.data.biddingDate,
-                getTimeZone(),
-              ),
-              'dd/MM/yyyy',
-            )}
-          />
-          <Label
-            title="Data de homologação"
-            value={format(
-              utcToZonedTime(
-                agreement.proposalData.data.homologationDate,
-                getTimeZone(),
-              ),
-              'dd/MM/yyyy',
-            )}
-          />
-          <Label
-            title="Referência legal"
-            value={agreement.proposalData.data.legalFoundation}
-          />
-          <Label
-            title="Valor"
-            value={Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(
-              agreement.proposalData.programs.reduce(
-                (accumulator, program) => accumulator + program.value,
-                0,
-              ),
-            )}
-          />
-          <Label
-            title="Descrição"
-            value={agreement.proposalData.data.description}
-          />
-          <Label title="Objeto" value={agreement.proposalData.data.object} />
-        </Box>
+        <Paper className={classes.collapseContainer}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width={1}
+          >
+            <Text fontSize={18} fontWeight={400}>
+              Execução
+            </Text>
+
+            <Button
+              className={classes.expandButton}
+              variant="contained"
+              disableElevation
+              onClick={(): void =>
+                expanded !== 'execution'
+                  ? setExpanded('execution')
+                  : setExpanded(null)
+              }
+            >
+              {expanded === 'execution' ? 'Mostrar menos' : 'Mostrar mais'}
+            </Button>
+
+            {/* <IconButton
+              aria-label="close"
+              className={classes.expandButton}
+              onClick={(): void =>
+                expanded !== 'execution'
+                  ? setExpanded('execution')
+                  : setExpanded(null)
+              }
+            >
+              <FiChevronDown
+                size={23}
+                strokeWidth={4}
+                style={{
+                  transition: 'all 200ms',
+                  transform:
+                    expanded === 'execution'
+                      ? 'rotate(180deg)'
+                      : 'rotate(0deg)',
+                }}
+              />
+            </IconButton> */}
+          </Box>
+
+          <Collapse
+            in={expanded === 'execution'}
+            collapsedHeight={60}
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Label title="TO-DO" value="Table" />
+            <Label title="TO-DO" value="List" />
+          </Collapse>
+        </Paper>
+
+        <Paper className={classes.collapseContainer}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width={1}
+          >
+            <Text fontSize={18} fontWeight={400}>
+              Prestação de contas
+            </Text>
+
+            <Button
+              className={classes.expandButton}
+              variant="contained"
+              disableElevation
+              onClick={(): void =>
+                expanded !== 'accountability'
+                  ? setExpanded('accountability')
+                  : setExpanded(null)
+              }
+            >
+              {expanded === 'accountability' ? 'Mostrar menos' : 'Mostrar mais'}
+            </Button>
+
+            {/* <IconButton
+              aria-label="close"
+              className={classes.expandButton}
+              onClick={(): void =>
+                expanded !== 'accountability'
+                  ? setExpanded('accountability')
+                  : setExpanded(null)
+              }
+            >
+              <FiChevronDown
+                size={23}
+                strokeWidth={4}
+                style={{
+                  transition: 'all 200ms',
+                  transform:
+                    expanded === 'accountability'
+                      ? 'rotate(180deg)'
+                      : 'rotate(0deg)',
+                }}
+              />
+            </IconButton> */}
+          </Box>
+
+          <Collapse
+            in={expanded === 'accountability'}
+            collapsedHeight={60}
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Label
+              title="Órgão concedente"
+              value={agreement.accountability.data.organ}
+            />
+            <Label
+              title="Convenente/Contratado"
+              value={agreement.accountability.data.convenient}
+            />
+            <Label
+              title="CNPJ"
+              value={agreement.accountability.data.documentNumber}
+            />
+            <Label
+              title="Modalidade"
+              value={agreement.accountability.data.modality}
+            />
+            <Label
+              title="Situação"
+              value={agreement.accountability.data.status}
+            />
+            <Label
+              title="Número"
+              value={agreement.accountability.data.number}
+            />
+            <Label
+              title="Vigência"
+              value={agreement.accountability.data.validity}
+            />
+            <Label
+              title="Data limite"
+              value={format(
+                utcToZonedTime(
+                  agreement.accountability.data.limitDate,
+                  getTimeZone(),
+                ),
+                'dd/MM/yyyy',
+              )}
+            />
+            <Label
+              title="Valor total"
+              value={Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(agreement.accountability.data.totalValue)}
+            />
+            <Label
+              title="Valor do repasse"
+              value={Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(agreement.accountability.data.transferValue)}
+            />
+            <Label
+              title="Valor de contrapartida"
+              value={Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(agreement.accountability.data.counterpartValue)}
+            />
+            <Label
+              title="Valor de rendimento"
+              value={Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(agreement.accountability.data.yieldValue)}
+            />
+          </Collapse>
+        </Paper>
       </DialogContent>
     </Dialog>
   ) : null;

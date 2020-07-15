@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 
-import Agreement from '~/typings/Agreement';
+import Agreement from '~/@types/Agreement';
 
 import Dialog from '~/components/Dialog';
 import DialogTitle from '~/components/Dialog/Title';

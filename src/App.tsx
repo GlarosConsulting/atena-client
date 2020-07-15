@@ -8,20 +8,25 @@ import 'typeface-roboto';
 import './styles/global.css';
 import { light } from './styles/themes';
 
+import AppProvider from './AppProvider';
 import Routes from './routes';
 
-const App: React.FC = () => (
-  <>
-    <Helmet>
-      <title>Atena</title>
-    </Helmet>
+const App: React.FC = () => {
+  return (
+    <>
+      <Helmet>
+        <title>Atena</title>
+      </Helmet>
 
-    <ThemeProvider theme={light}>
-      <Router>
-        <Routes />
-      </Router>
-    </ThemeProvider>
-  </>
-);
+      <ThemeProvider theme={light}>
+        <Router>
+          <AppProvider>
+            <Routes />
+          </AppProvider>
+        </Router>
+      </ThemeProvider>
+    </>
+  );
+};
 
 export default App;
