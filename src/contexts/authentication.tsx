@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Session from '../@types/Session';
 import usePersistedState from '../hooks/usePersistedState';
@@ -25,8 +26,10 @@ const AuthenticationContext = createContext<AuthenticationContextData>(
 const AuthenticationProvider: React.FC = ({ children }) => {
   const [data, setData] = usePersistedState<Session>('session', {} as Session);
 
+  const navigate = useNavigate();
+
   const isSignedIn = useCallback(() => {
-    return !!data?.accessToken;
+    return !!data?.user;
   }, [data]);
 
   const signIn = useCallback(
@@ -43,7 +46,8 @@ const AuthenticationProvider: React.FC = ({ children }) => {
 
   const signOut = useCallback(() => {
     setData({} as Session);
-  }, [setData]);
+    navigate('/');
+  }, [setData, navigate]);
 
   return (
     <AuthenticationContext.Provider

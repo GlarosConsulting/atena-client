@@ -8,8 +8,8 @@ import Container from '@material-ui/core/Container';
 import Header from '~/components/Header';
 import Text from '~/components/Text';
 
-import Users from './Users';
-import Groups from './Groups';
+import List from './List';
+import Groupings from './Groupings';
 
 const useStyles = makeStyles({
   title: {
@@ -25,7 +25,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Groupings: React.FC = () => {
+const Users: React.FC = () => {
   const classes = useStyles();
 
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ const Groupings: React.FC = () => {
             >
               Usuários
             </Text>
-            <Users style={{ marginTop: 5 }} />
+            <List style={{ marginTop: 5 }} />
           </Box>
           <Box marginTop={5}>
             <Text
@@ -72,9 +72,9 @@ const Groupings: React.FC = () => {
               color="#808080"
               marginLeft={0.5}
             >
-              Grupos
+              Agrupamentos
             </Text>
-            <Groups style={{ marginTop: 5 }} />
+            <Groupings style={{ marginTop: 5 }} />
           </Box>
         </Box>
       </Container>
@@ -82,4 +82,4 @@ const Groupings: React.FC = () => {
   );
 };
 
-export default Groupings;
+export default Users;

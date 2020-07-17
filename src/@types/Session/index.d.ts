@@ -1,7 +1,5 @@
 export default interface Session {
   user: User;
-  accessToken: string;
-  refreshToken: string;
 }
 
 export interface User {
@@ -9,12 +7,13 @@ export interface User {
   name: string;
   email: string;
   username: string;
-  group: Group;
+  group?: Group;
 }
 
 export interface Group {
   id: string;
   name: string;
+  access: 'ANY' | 'MUNICIPAL_SPHERE' | 'STATE_SPHERE' | 'CITIES';
   cities: City[];
 }
 
@@ -24,5 +23,3 @@ export interface City {
   uf: string;
   ibge: string;
 }
-
-export type Role = 'ADMIN' | 'MANAGER' | 'MODERATOR' | 'NORMAL';

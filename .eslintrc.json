@@ -34,6 +34,7 @@
     "camelcase": "off",
     "react/jsx-curly-newline": "off",
     "react/jsx-props-no-spreading": "off",
+    "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "react-hooks/exhaustive-deps": "warn",
     "react-hooks/rules-of-hooks": "error",

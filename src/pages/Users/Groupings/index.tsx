@@ -4,6 +4,7 @@ import {
   createMuiTheme,
   MuiThemeProvider,
 } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -17,11 +18,11 @@ import Chip from '@material-ui/core/Chip';
 import { Group, City } from '~/@types/Session';
 import api from '~/services/api';
 
-interface GroupsProps {
+interface GroupingsProps {
   style?: React.CSSProperties;
 }
 
-const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
+const Groupings: React.FC<GroupingsProps> = ({ ...rest }) => {
   const theme = useTheme();
   const tableTheme = createMuiTheme({
     ...theme,
@@ -38,6 +39,9 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
         },
       },
       MuiTableCell: {
+        root: {
+          padding: 8,
+        },
         head: {
           '&[class*="MTableHeader"]': {
             backgroundColor: theme.palette.primary.light,
@@ -46,6 +50,8 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
       },
       MuiChip: {
         root: {
+          marginTop: 2.5,
+          marginBottom: 2.5,
           '&:not(:last-child)': {
             marginRight: 10,
           },
@@ -53,6 +59,8 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
       },
     },
   });
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const [data, setData] = useState<Group[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -71,17 +79,28 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
     (): Column<Group>[] => [
       { title: 'Nome', field: 'name' },
       {
-        title: 'Cidades',
+        title: 'Acesso',
+        field: 'access',
+        lookup: {
+          ANY: 'Qualquer esfera e município',
+          MUNICIPAL_SPHERE: 'Esfera municipal',
+          STATE_SPHERE: 'Esfera estadual',
+          CITIES: 'Municipios especifícos',
+        },
+      },
+      {
+        title: 'Municípios',
         field: 'cities',
-        editComponent: ({ value, onChange }) => {
-          const selected = (value as City[]).map(city => city.id);
+        editComponent: ({ value, onChange, rowData }) => {
+          if (rowData.access !== 'CITIES') return <></>;
+
+          const selected = value ? (value as City[]).map(city => city.id) : [];
 
           return (
-            <FormControl>
+            <FormControl style={{ minWidth: 150 }}>
               <InputLabel id="cities-select-label">Cidades</InputLabel>
               <Select
                 labelId="cities-select-label"
-                id="demo-mutiple-checkbox"
                 multiple
                 value={selected}
                 onChange={event => {
@@ -102,6 +121,11 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
 
                     return city ? city.name : 'NOT_FOUND';
                   });
+
+                  if (cityNames.length >= 4) {
+                    cityNames.length = 4;
+                    cityNames[3] = '...';
+                  }
 
                   return cityNames.join(', ');
                 }}
@@ -160,18 +184,40 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
           pagination: { labelRowsSelect: 'grupos' },
         }}
         editable={{
-          onRowAdd: newData =>
-            new Promise((resolve, reject) => {
-              setData([...data, newData]);
+          onRowAdd: async newData => {
+            const requestData = {
+              name: newData.name,
+              access: newData.access,
+              cityIds: newData.cities.map(city => city.id),
+            };
 
-              resolve();
-            }),
-          onRowUpdate: (newData, oldData) =>
-            new Promise((resolve, reject) => {
-              if (!oldData) {
-                reject();
-                return;
-              }
+            try {
+              const response = await api.post('groups', requestData);
+
+              setData([...data, response.data]);
+            } catch {
+              enqueueSnackbar('Preecha os campos corretamente.', {
+                variant: 'error',
+              });
+            }
+          },
+          onRowUpdate: async (_newData, oldData) => {
+            if (!oldData) return;
+
+            const newData = _newData;
+
+            if (newData.access !== 'CITIES') {
+              newData.cities = [];
+            }
+
+            const requestData = {
+              name: newData.name,
+              access: newData.access,
+              cityIds: newData.cities.map(city => city.id),
+            };
+
+            try {
+              await api.put(`groups/${oldData.id}`, requestData);
 
               const dataUpdate = [...data];
 
@@ -179,20 +225,22 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
               dataUpdate[index] = newData;
 
               setData([...dataUpdate]);
+            } catch {
+              enqueueSnackbar('Preecha os campos corretamente.', {
+                variant: 'error',
+              });
+            }
+          },
+          onRowDelete: async oldData => {
+            await api.delete(`groups/${oldData.id}`);
 
-              resolve();
-            }),
-          onRowDelete: oldData =>
-            new Promise((resolve, reject) => {
-              const dataDelete = [...data];
+            const dataDelete = [...data];
 
-              const index = data.findIndex(el => el.id === oldData.id);
-              dataDelete.splice(index, 1);
+            const index = data.findIndex(el => el.id === oldData.id);
+            dataDelete.splice(index, 1);
 
-              setData([...dataDelete]);
-
-              resolve();
-            }),
+            setData([...dataDelete]);
+          },
         }}
         options={{
           maxBodyHeight: 200,
@@ -203,4 +251,4 @@ const Groups: React.FC<GroupsProps> = ({ ...rest }) => {
   );
 };
 
-export default Groups;
+export default Groupings;
