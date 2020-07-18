@@ -11,7 +11,7 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 import { FaPlus } from 'react-icons/fa';
 import MaterialTable, { Column } from 'material-table';
 
-import Agreement from '~/typings/Agreement';
+import Agreement from '~/@types/Agreement';
 
 import getTimeZone from '~/utils/getTimeZone';
 
@@ -53,7 +53,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
     (): Column<Agreement>[] => [
       {
         title: 'Visualizar',
-        render: (row): React.ReactElement => (
+        render: row => (
           <Box
             display="flex"
             justifyContent="center"

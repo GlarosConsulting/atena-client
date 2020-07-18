@@ -6,6 +6,7 @@ export default interface Agreement {
   end: Date;
   program: string;
   proposalData: ProposalData;
+  accountability: Accountability;
 }
 
 export interface ProposalData {
@@ -42,4 +43,21 @@ export interface ProposalData {
     name: string;
     value: number;
   }[];
+}
+
+export interface Accountability {
+  data: {
+    organ: string;
+    convenient: string;
+    documentNumber: string;
+    modality: string;
+    status: string;
+    number: string;
+    validity: string;
+    limitDate: Date;
+    totalValue: number;
+    transferValue: number;
+    counterpartValue: number;
+    yieldValue: number;
+  };
 }
