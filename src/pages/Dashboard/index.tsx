@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
       marginTop: 0,
     },
   },
-  citySelectFormControl: {
+  selectFormControl: {
     width: 150,
     minWidth: 130,
   },
@@ -56,9 +56,8 @@ const Dashboard: React.FC = () => {
 
   const { user, signOut } = useAuthentication();
 
-  console.log(user);
-
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCity, setSelectedCity] = useState('Todos');
+  const [selectedSphere, setSelectedSphere] = useState('Municipal');
   const [date, setDate] = useState<DateRange>([
     subDays(new Date(), 1),
     new Date(),
@@ -70,10 +69,14 @@ const Dashboard: React.FC = () => {
 
   const handleSearch = useCallback(() => {
     const newData = {
+      UF: 'AL',
       beginDate: date[0],
       endDate: date[1],
-      cityId: selectedCity,
-      UF: 'AL',
+      sphere: selectedSphere,
+      cityId:
+        selectedCity !== 'Todos' && selectedSphere === 'Municipal'
+          ? selectedCity
+          : undefined,
     };
 
     setData(newData);
@@ -83,10 +86,9 @@ const Dashboard: React.FC = () => {
         params: newData,
       })
       .then(response => {
-        console.log(response.data);
         setStatistics(response.data.statistics);
       });
-  }, [selectedCity, date]);
+  }, [selectedSphere, selectedCity, date]);
 
   useEffect(() => {
     handleSearch();
@@ -100,31 +102,58 @@ const Dashboard: React.FC = () => {
           flexDirection={{ xs: 'column', sm: 'row' }}
           alignItems="center"
         >
-          <FormControl
-            className={classNames(
-              classes.citySelectFormControl,
-              classes.fieldResponsiveContainer,
-            )}
-            variant="outlined"
-          >
-            <InputLabel id="city-select-label">Municípios</InputLabel>
-            <Select
-              labelId="city-select-label"
-              id="city-select"
-              value={selectedCity}
-              onChange={(event): void =>
-                setSelectedCity(event.target.value as string)
-              }
-              label="Municípios"
+          <Box display="flex" alignItems="center">
+            <FormControl
+              className={classNames(
+                classes.selectFormControl,
+                classes.fieldResponsiveContainer,
+              )}
+              variant="outlined"
             >
-              <MenuItem value="">
-                <em>Todos</em>
-              </MenuItem>
-              {user?.group?.cities.map(city => (
-                <MenuItem value={city.id}>{city.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <InputLabel id="sphere-select-label">Esfera</InputLabel>
+              <Select
+                labelId="sphere-select-label"
+                id="sphere-select"
+                value={selectedSphere}
+                onChange={(event): void =>
+                  setSelectedSphere(event.target.value as string)
+                }
+                label="Esfera"
+              >
+                <MenuItem value="Municipal">Municipal</MenuItem>
+                <MenuItem value="Estadual">Estadual</MenuItem>
+              </Select>
+            </FormControl>
+
+            {selectedSphere === 'Municipal' && (
+              <FormControl
+                className={classNames(
+                  classes.selectFormControl,
+                  classes.fieldResponsiveContainer,
+                )}
+                variant="outlined"
+                style={{ marginLeft: 15 }}
+              >
+                <InputLabel id="city-select-label">Municípios</InputLabel>
+                <Select
+                  labelId="city-select-label"
+                  id="city-select"
+                  value={selectedCity}
+                  onChange={(event): void =>
+                    setSelectedCity(event.target.value as string)
+                  }
+                  label="Municípios"
+                >
+                  <MenuItem value="Todos">
+                    <em>Todos</em>
+                  </MenuItem>
+                  {user?.group?.cities.map(city => (
+                    <MenuItem value={city.id}>{city.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
 
           <Box
             bgcolor="#707070"
