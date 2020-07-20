@@ -38,11 +38,28 @@ export interface ProposalData {
       publication: string;
     };
   };
-  programs: {
-    programId: number;
-    name: string;
-    value: number;
-  }[];
+  programs: Program[];
+}
+
+export interface Program {
+  programId: number;
+  name: string;
+  value: number;
+  details: {
+    cps: string;
+    items: string;
+    couterpartRule: string;
+    totalValue: number;
+    couterpartValues: {
+      total: number;
+      financial: number;
+      assetsAndServices: number;
+    } | null;
+    transferValues: {
+      total: number;
+      amendment: string;
+    } | null;
+  };
 }
 
 export interface Accountability {
