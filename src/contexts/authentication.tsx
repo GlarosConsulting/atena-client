@@ -1,7 +1,12 @@
-import React, { createContext, useCallback, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import Session from '../@types/Session';
+import Session, { User } from '../@types/Session';
 import usePersistedState from '../hooks/usePersistedState';
 import api from '../services/api';
 
@@ -26,6 +31,7 @@ const AuthenticationContext = createContext<AuthenticationContextData>(
 const AuthenticationProvider: React.FC = ({ children }) => {
   const [data, setData] = usePersistedState<Session>('session', {} as Session);
 
+  const location = useLocation();
   const navigate = useNavigate();
 
   const isSignedIn = useCallback(() => {
@@ -48,6 +54,17 @@ const AuthenticationProvider: React.FC = ({ children }) => {
     setData({} as Session);
     navigate('/');
   }, [setData, navigate]);
+
+  useEffect(() => {
+    if (!isSignedIn()) return;
+
+    api.get<User>(`users/${data.user.id}`).then(response => {
+      setData({
+        ...data,
+        user: response.data,
+      });
+    });
+  }, [location]); // eslint-disable-line
 
   return (
     <AuthenticationContext.Provider
