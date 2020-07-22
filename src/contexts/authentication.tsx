@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import Session, { User } from '../@types/Session';
+import Session, { User, AccessType } from '../@types/Session';
 import usePersistedState from '../hooks/usePersistedState';
 import api from '../services/api';
 
@@ -22,6 +22,7 @@ interface AuthenticationContextData {
   isSignedIn(): boolean;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
+  hasAccess(accessType: AccessType | AccessType[]): boolean;
 }
 
 const AuthenticationContext = createContext<AuthenticationContextData>(
@@ -55,6 +56,19 @@ const AuthenticationProvider: React.FC = ({ children }) => {
     navigate('/');
   }, [setData, navigate]);
 
+  const hasAccess = useCallback(
+    (accessType: AccessType | AccessType[]) => {
+      if (!isSignedIn()) return false;
+
+      const accessTypes: AccessType[] = Array.isArray(accessType)
+        ? accessType
+        : [accessType];
+
+      return accessTypes.includes(data.user.group?.access as AccessType);
+    },
+    [isSignedIn, data],
+  );
+
   useEffect(() => {
     if (!isSignedIn()) return;
 
@@ -68,7 +82,7 @@ const AuthenticationProvider: React.FC = ({ children }) => {
 
   return (
     <AuthenticationContext.Provider
-      value={{ user: data?.user, isSignedIn, signIn, signOut }}
+      value={{ user: data?.user, isSignedIn, signIn, signOut, hasAccess }}
     >
       {children}
     </AuthenticationContext.Provider>

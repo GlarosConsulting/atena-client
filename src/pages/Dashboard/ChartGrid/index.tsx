@@ -14,10 +14,13 @@ import {
   Area,
 } from 'recharts';
 
+import FadeIn from 'react-fade-in';
+import Statistics from '~/@types/Statistics';
 import ProgressBar from './ProgressBar';
+import Text from '~/components/Text';
 
 interface ChartGridProps {
-  data?: { city: string };
+  statistics: Statistics;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -29,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing(2, 3, 3),
+    padding: theme.spacing(0, 3, 3),
     backgroundColor: lighten(theme.palette.primary.light, 0.6),
     borderRadius: 10,
     height: '100%',
@@ -38,14 +41,15 @@ const useStyles = makeStyles(theme => ({
       boxShadow: theme.shadows[5],
     },
   },
-  progressBar: {
+  fadeIn: {
+    width: '100%',
     '&:not(:last-child)': {
       marginBottom: theme.spacing(1),
     },
   },
 }));
 
-const ChartGrid: React.FC<ChartGridProps> = ({ data = { city: '' } }) => {
+const ChartGrid: React.FC<ChartGridProps> = ({ statistics }) => {
   const classes = useStyles();
 
   return (
@@ -56,26 +60,29 @@ const ChartGrid: React.FC<ChartGridProps> = ({ data = { city: '' } }) => {
           elevation={3}
           style={{ justifyContent: 'flex-start' }}
         >
-          <ProgressBar
-            className={classes.progressBar}
-            title="Min. Desenvolvimento Regional"
-            percentage={50}
-          />
-          <ProgressBar
-            className={classes.progressBar}
-            title="Min. da Cidadania"
-            percentage={25}
-          />
-          <ProgressBar
-            className={classes.progressBar}
-            title="Min. da agropecuária e abastecimento"
-            percentage={60}
-          />
-          <ProgressBar
-            className={classes.progressBar}
-            title="Fundo nac. de des. da educação"
-            percentage={77}
-          />
+          <Text fontSize={17} fontWeight="bold" marginY={1.5}>
+            Organizações
+          </Text>
+
+          {statistics.topTenOrgans.length > 0 ? (
+            statistics.topTenOrgans.map(organ => (
+              <FadeIn className={classes.fadeIn}>
+                <ProgressBar
+                  title={organ.name}
+                  value={organ.count}
+                  percentage={organ.percentage}
+                />
+              </FadeIn>
+            ))
+          ) : (
+            <FadeIn className={classes.fadeIn}>
+              <ProgressBar
+                title="Nenhuma informação"
+                value={0}
+                percentage={0}
+              />
+            </FadeIn>
+          )}
         </Paper>
       </Grid>
 
@@ -85,21 +92,29 @@ const ChartGrid: React.FC<ChartGridProps> = ({ data = { city: '' } }) => {
           elevation={3}
           style={{ padding: 0 }}
         >
-          <ResponsiveContainer height={300}>
+          <Text fontSize={17} fontWeight="bold" marginY={1.5}>
+            Contrapartida
+          </Text>
+
+          <ResponsiveContainer height={250}>
             <BarChart
               width={730}
               height={250}
               data={[
                 {
-                  name: 'Possui contrapartida',
-                  convenios: 60,
+                  name: 'Financeira',
+                  convenios: statistics.counterpart.financial,
                 },
                 {
-                  name: 'Não possui',
-                  convenios: 80,
+                  name: 'Bens e serviços',
+                  convenios: statistics.counterpart.assetsAndServices,
+                },
+                {
+                  name: 'Nenhuma',
+                  convenios: statistics.counterpart.empty,
                 },
               ]}
-              margin={{ top: 30, right: 35, left: 0, bottom: 0 }}
+              margin={{ top: 0, right: 45, left: 0, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
@@ -145,7 +160,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ data = { city: '' } }) => {
                   convenios: 47,
                 },
               ]}
-              margin={{ top: 30, right: 35, left: 0, bottom: 0 }}
+              margin={{ top: 30, right: 45, left: 0, bottom: 10 }}
             >
               <defs>
                 <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">

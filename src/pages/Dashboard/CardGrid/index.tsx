@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import capitalize from 'capitalize';
 import Grid from '@material-ui/core/Grid';
@@ -7,7 +7,6 @@ import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
 import api from '~/services/api';
-import getRandomArbitrary from '~/utils/getRandomArbitrary';
 
 import Card from './Card';
 import CardDialog from './Dialog';
@@ -40,51 +39,16 @@ const CardGrid: React.FC<CardGridProps> = ({ statistics, data }) => {
   const [dialog, setDialog] = useState<{ summary: string } | null>();
   const [agreements, setAgreements] = useState<Agreement[]>([]);
 
-  const threeDaysData = useMemo(
-    () => ({
-      count: getRandomArbitrary(
-        statistics.total.count / 3,
-        statistics.total.count / 2,
-      ),
-      value: getRandomArbitrary(
-        statistics.total.count / 3,
-        statistics.total.value / 2,
-      ),
-    }),
-    [statistics],
-  );
-  const thirtyDaysData = useMemo(
-    () => ({
-      count: getRandomArbitrary(
-        statistics.total.count / 2,
-        statistics.total.count,
-      ),
-      value: getRandomArbitrary(
-        statistics.total.count / 2,
-        statistics.total.value,
-      ),
-    }),
-    [statistics],
-  );
-  const newAgreementsData = useMemo(
-    () =>
-      data && data.Cidade === 'ARAPIRACA'
-        ? {
-            count: 64,
-            value: 7350500,
-          }
-        : {
-            count: 0,
-            value: 0,
-          },
-    [data],
-  );
-
-  function handleOpenCardDialog({ title }: any): void {
+  function handleOpenCardDialog({ id, title }: any): void {
     setDialog({ summary: capitalize(title.label) });
 
     api
-      .get<AgreementsResponse>('/agreements', { params: data })
+      .get<AgreementsResponse>('/agreements', {
+        params: {
+          ...data,
+          customFilter: id,
+        },
+      })
       .then(response => {
         setAgreements(response.data.agreements);
       });
@@ -106,46 +70,57 @@ const CardGrid: React.FC<CardGridProps> = ({ statistics, data }) => {
         </Grid>
         <Grid className={classes.item} item xs={6} sm={3} md={2}>
           <Card
-            id="empenhados-3-dias"
+            id="execucao"
             title={{
-              count: threeDaysData.count,
-              label: 'convênios empenhados nos últimos 3 dias',
+              count: statistics.execution.count,
+              label: 'convênios em executação',
             }}
-            value={threeDaysData.value}
+            value={statistics.execution.value}
+            onClick={handleOpenCardDialog}
           />
         </Grid>
         <Grid className={classes.item} item xs={6} sm={3} md={2}>
           <Card
-            id="empenhados-30-dias"
+            id="contratos-repasse"
             title={{
-              count: thirtyDaysData.count,
-              label: 'convênios empenhados nos últimos 30 dias',
+              count: statistics.transfer.count,
+              label: 'contratos de repasse',
             }}
-            value={thirtyDaysData.value}
+            value={statistics.transfer.value}
+            onClick={handleOpenCardDialog}
           />
         </Grid>
         <Grid className={classes.item} item xs={6} sm={3} md={2}>
           <Card
-            id="novos"
+            id="contratos-repasse-execucao"
             title={{
-              count: newAgreementsData.count,
-              label: 'novos convênios',
+              count: statistics.transferInExecution.count,
+              label: 'contratos de repasse em execução',
             }}
-            value={newAgreementsData.value}
+            value={statistics.transferInExecution.value}
+            onClick={handleOpenCardDialog}
           />
         </Grid>
         <Grid className={classes.item} item xs={6} sm={3} md={2}>
           <Card
-            id="cronograma-em-dia"
-            title={{ count: 0, label: 'convênios com cronograma em dia' }}
-            value={0}
+            id="licitacoes-concluidas"
+            title={{
+              count: statistics.completedBiddings.count,
+              label: 'licitações concluídas',
+            }}
+            value={statistics.completedBiddings.value}
+            onClick={handleOpenCardDialog}
           />
         </Grid>
         <Grid className={classes.item} item xs={6} sm={3} md={2}>
           <Card
-            id="cronograma-adiantado"
-            title={{ count: 0, label: 'convênios com cronograma adiantado' }}
-            value={0}
+            id="contratos-concluidos"
+            title={{
+              count: statistics.completedContracts.count,
+              label: 'contratos concluídos',
+            }}
+            value={statistics.completedContracts.value}
+            onClick={handleOpenCardDialog}
           />
         </Grid>
       </Grid>
