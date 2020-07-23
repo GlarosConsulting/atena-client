@@ -6,6 +6,7 @@ export default interface Agreement {
   end: Date;
   program: string;
   proposalData: ProposalData;
+  convenientExecution: ConvenientExecution;
   accountability: Accountability;
 }
 
@@ -59,6 +60,43 @@ export interface Program {
       total: number;
       amendment: string;
     } | null;
+  };
+}
+
+export interface ConvenientExecution {
+  executionProcesses: ExecutionProcess[];
+}
+
+export interface ExecutionProcess {
+  executionId: string;
+  type: string;
+  date: Date;
+  processId: string;
+  status: string;
+  systemStatus: string;
+  system: string;
+  accepted: string;
+  details: {
+    executionProcess: string;
+    buyType: string;
+    status: string;
+    origin: string;
+    financialResource: string;
+    modality: string;
+    biddingType: string;
+    processId: string;
+    biddingId: string;
+    object: string;
+    legalFoundation: string;
+    justification: string;
+    publishDate: Date;
+    beginDate: Date;
+    endDate: Date;
+    biddingValue: number;
+    homologationDate: Date;
+    city: string;
+    analysisDate: Date;
+    accepted: string;
   };
 }
 

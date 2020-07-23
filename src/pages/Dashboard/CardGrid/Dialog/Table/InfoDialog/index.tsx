@@ -14,7 +14,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
 import { FiInfo } from 'react-icons/fi';
-import Agreement, { Program } from '~/@types/Agreement';
+import Agreement, { Program, ExecutionProcess } from '~/@types/Agreement';
 
 import getTimeZone from '~/utils/getTimeZone';
 import formatValue from '~/utils/formatValue';
@@ -26,6 +26,8 @@ import Text from '~/components/Text';
 
 import Label from './Label';
 import ProgramDetailsDialog from './ProgramDetailsDialog';
+import ExecutionProcessDetailsDialog from './ExecutionProcessDetailsDialog';
+import formatDate from '~/utils/formatDate';
 
 interface InfoDialogProps {
   open: boolean;
@@ -61,11 +63,16 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
   const classes = useStyles();
 
   const [expanded, setExpanded] = useState<string | null>();
-  const [programDetails, setProgramDetails] = useState<Program | null>();
+
+  const [program, setProgram] = useState<Program | null>();
+  const [
+    executionProcess,
+    setExecutionProcess,
+  ] = useState<ExecutionProcess | null>();
 
   return agreement ? (
     <>
-      <Dialog open={open} responsive maxWidth="sm" fullWidth onClose={onClose}>
+      <Dialog open={open} responsive maxWidth="md" fullWidth onClose={onClose}>
         <DialogTitle onClose={onClose}>Informações</DialogTitle>
         <DialogContent dividers>
           <Paper className={classes.collapseContainer}>
@@ -176,7 +183,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                   currency: 'BRL',
                 }).format(
                   agreement.proposalData.programs.reduce(
-                    (accumulator, program) => accumulator + program.value,
+                    (accumulator, el) => accumulator + el.value,
                     0,
                   ),
                 )}
@@ -189,6 +196,39 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                 title="Objeto"
                 value={agreement.proposalData.data.object}
               />
+
+              <Text fontSize={16} fontWeight="bold">
+                Programas
+              </Text>
+              <TableContainer component={Paper} style={{ margin: '5px 0' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Código</TableCell>
+                      <TableCell>Nome</TableCell>
+                      <TableCell>Valor</TableCell>
+                      <TableCell>Detalhes</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {agreement.proposalData.programs.map(el => (
+                      <TableRow>
+                        <TableCell>{el.programId}</TableCell>
+                        <TableCell>{el.name}</TableCell>
+                        <TableCell>{formatValue(el.value)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            onClick={() => setProgram(el)}
+                          >
+                            <FiInfo size={18} color="#424242" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Collapse>
           </Paper>
 
@@ -241,37 +281,49 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
 
             <Collapse
               in={expanded === 'execution'}
-              collapsedHeight={60}
+              collapsedHeight={80}
               style={{
                 marginTop: 10,
               }}
             >
-              <TableContainer component={Paper} style={{ marginBottom: 3 }}>
+              <TableContainer component={Paper} style={{ margin: '5px 0' }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Código</TableCell>
-                      <TableCell>Nome</TableCell>
-                      <TableCell>Valor</TableCell>
+                      <TableCell>Número</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell>Data de publicação</TableCell>
+                      <TableCell>Número do processo</TableCell>
+                      <TableCell>Situação</TableCell>
+                      <TableCell>Situação no sistema de origem</TableCell>
+                      <TableCell>Sistema de origem</TableCell>
+                      <TableCell>Aceite</TableCell>
                       <TableCell>Detalhes</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {agreement.proposalData.programs.map(program => (
-                      <TableRow>
-                        <TableCell>{program.programId}</TableCell>
-                        <TableCell>{program.name}</TableCell>
-                        <TableCell>{formatValue(program.value)}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="contained"
-                            onClick={() => setProgramDetails(program)}
-                          >
-                            <FiInfo size={18} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {agreement.convenientExecution.executionProcesses.map(
+                      el => (
+                        <TableRow>
+                          <TableCell>{el.executionId}</TableCell>
+                          <TableCell>{el.type}</TableCell>
+                          <TableCell>{formatDate(el.date)}</TableCell>
+                          <TableCell>{el.processId}</TableCell>
+                          <TableCell>{el.status}</TableCell>
+                          <TableCell>{el.systemStatus}</TableCell>
+                          <TableCell>{el.system}</TableCell>
+                          <TableCell>{el.accepted}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="contained"
+                              onClick={() => setExecutionProcess(el)}
+                            >
+                              <FiInfo size={18} color="#424242" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ),
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -406,9 +458,15 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
       </Dialog>
 
       <ProgramDetailsDialog
-        open={!!programDetails}
-        program={programDetails}
-        onClose={() => setProgramDetails(null)}
+        open={!!program}
+        program={program}
+        onClose={() => setProgram(null)}
+      />
+
+      <ExecutionProcessDetailsDialog
+        open={!!executionProcess}
+        executionProcess={executionProcess}
+        onClose={() => setExecutionProcess(null)}
       />
     </>
   ) : null;

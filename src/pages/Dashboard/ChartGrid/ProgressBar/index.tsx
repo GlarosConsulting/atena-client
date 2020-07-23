@@ -8,6 +8,7 @@ import Text from '~/components/Text';
 interface ProgressBarProps {
   className?: string;
   title: string;
+  value: number;
   percentage: number;
 }
 
@@ -20,6 +21,7 @@ const useStyles = makeStyles({
 const ProgressBar: React.FC<ProgressBarProps> = ({
   className,
   title,
+  value,
   percentage,
 }) => {
   const classes = useStyles();
@@ -31,7 +33,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           {title}
         </Text>
         <Text fontSize={14} color="#505050" marginRight={1}>
-          {`${percentage}%`}
+          {value}
         </Text>
       </Box>
       <LinearProgress

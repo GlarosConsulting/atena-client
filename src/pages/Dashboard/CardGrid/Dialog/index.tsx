@@ -37,7 +37,7 @@ const CardDialog: React.FC<CardDialogProps> = ({
   const classes = useStyles();
 
   return (
-    <Dialog open={open} responsive maxWidth="md" fullWidth onClose={onClose}>
+    <Dialog open={open} responsive maxWidth="lg" fullWidth onClose={onClose}>
       <DialogTitle onClose={onClose}>Convênios</DialogTitle>
       <DialogContent dividers>
         {summary && (

@@ -26,6 +26,7 @@ import Header from '~/components/Header';
 
 import CardGrid from './CardGrid';
 import ChartGrid from './ChartGrid';
+import { City } from '~/@types/Session';
 
 interface AgreementsResponse {
   statistics: Statistics;
@@ -54,18 +55,28 @@ const useStyles = makeStyles(theme => ({
 const Dashboard: React.FC = () => {
   const classes = useStyles();
 
-  const { user, signOut } = useAuthentication();
+  const { user, signOut, hasAccess } = useAuthentication();
 
   const [selectedCity, setSelectedCity] = useState('Todos');
-  const [selectedSphere, setSelectedSphere] = useState('Municipal');
+  const [selectedSphere, setSelectedSphere] = useState(
+    hasAccess(['ANY', 'MUNICIPAL_SPHERE', 'CITIES']) ? 'Municipal' : 'Estadual',
+  );
   const [date, setDate] = useState<DateRange>([
     subDays(new Date(), 1),
     new Date(),
   ]);
   const [statistics, setStatistics] = useState<Statistics>({
     total: { count: 0, value: 0 },
+    execution: { count: 0, value: 0 },
+    transfer: { count: 0, value: 0 },
+    transferInExecution: { count: 0, value: 0 },
+    completedBiddings: { count: 0, value: 0 },
+    completedContracts: { count: 0, value: 0 },
+    topTenOrgans: [],
+    counterpart: { financial: 0, assetsAndServices: 0, empty: 0 },
   });
   const [data, setData] = useState<{ [key: string]: any }>();
+  const [cities, setCities] = useState<City[]>([]);
 
   const handleSearch = useCallback(() => {
     const newData = {
@@ -73,10 +84,10 @@ const Dashboard: React.FC = () => {
       beginDate: date[0],
       endDate: date[1],
       sphere: selectedSphere,
-      cityId:
+      cityIds:
         selectedCity !== 'Todos' && selectedSphere === 'Municipal'
           ? selectedCity
-          : undefined,
+          : user?.group?.cities.map(city => city.id),
     };
 
     setData(newData);
@@ -88,11 +99,22 @@ const Dashboard: React.FC = () => {
       .then(response => {
         setStatistics(response.data.statistics);
       });
-  }, [selectedSphere, selectedCity, date]);
+  }, [date, selectedSphere, selectedCity, user]);
 
   useEffect(() => {
     handleSearch();
   }, []); // eslint-disable-line
+
+  useEffect(() => {
+    if (!hasAccess(['ANY', 'MUNICIPAL_SPHERE'])) {
+      setCities(user.group?.cities || []);
+      return;
+    }
+
+    api.get<City[]>('cities').then(response => {
+      setCities(response.data);
+    });
+  }, [user, hasAccess]);
 
   return (
     <>
@@ -120,39 +142,44 @@ const Dashboard: React.FC = () => {
                 }
                 label="Esfera"
               >
-                <MenuItem value="Municipal">Municipal</MenuItem>
-                <MenuItem value="Estadual">Estadual</MenuItem>
+                {hasAccess(['ANY', 'MUNICIPAL_SPHERE', 'CITIES']) && (
+                  <MenuItem value="Municipal">Municipal</MenuItem>
+                )}
+                {hasAccess(['ANY', 'STATE_SPHERE']) && (
+                  <MenuItem value="Estadual">Estadual</MenuItem>
+                )}
               </Select>
             </FormControl>
 
-            {selectedSphere === 'Municipal' && (
-              <FormControl
-                className={classNames(
-                  classes.selectFormControl,
-                  classes.fieldResponsiveContainer,
-                )}
-                variant="outlined"
-                style={{ marginLeft: 15 }}
-              >
-                <InputLabel id="city-select-label">Municípios</InputLabel>
-                <Select
-                  labelId="city-select-label"
-                  id="city-select"
-                  value={selectedCity}
-                  onChange={(event): void =>
-                    setSelectedCity(event.target.value as string)
-                  }
-                  label="Municípios"
+            {hasAccess(['ANY', 'MUNICIPAL_SPHERE', 'CITIES']) &&
+              selectedSphere === 'Municipal' && (
+                <FormControl
+                  className={classNames(
+                    classes.selectFormControl,
+                    classes.fieldResponsiveContainer,
+                  )}
+                  variant="outlined"
+                  style={{ marginLeft: 15 }}
                 >
-                  <MenuItem value="Todos">
-                    <em>Todos</em>
-                  </MenuItem>
-                  {user?.group?.cities.map(city => (
-                    <MenuItem value={city.id}>{city.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+                  <InputLabel id="city-select-label">Municípios</InputLabel>
+                  <Select
+                    labelId="city-select-label"
+                    id="city-select"
+                    value={selectedCity}
+                    onChange={(event): void =>
+                      setSelectedCity(event.target.value as string)
+                    }
+                    label="Municípios"
+                  >
+                    <MenuItem value="Todos">
+                      <em>Todos</em>
+                    </MenuItem>
+                    {cities.map(city => (
+                      <MenuItem value={city.id}>{city.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
           </Box>
 
           <Box
@@ -229,7 +256,7 @@ const Dashboard: React.FC = () => {
       <Container maxWidth="lg">
         <Box marginTop={2.5} marginBottom={2}>
           <CardGrid statistics={statistics} data={data} />
-          <ChartGrid data={data && { city: data.Cidade }} />
+          <ChartGrid statistics={statistics} />
         </Box>
       </Container>
     </>

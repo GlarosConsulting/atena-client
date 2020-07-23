@@ -101,7 +101,15 @@ const Table: React.FC<TableProps> = ({ data }) => {
           title=""
           columns={columns}
           data={data}
-          localization={{ pagination: { labelRowsSelect: 'convênios' } }}
+          localization={{
+            toolbar: {
+              searchPlaceholder: 'Pesquisar',
+            },
+            body: {
+              emptyDataSourceMessage: 'Nenhum usuário',
+            },
+            pagination: { labelRowsSelect: 'convênios' },
+          }}
         />
       </MuiThemeProvider>
 

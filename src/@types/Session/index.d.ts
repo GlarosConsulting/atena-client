@@ -13,9 +13,11 @@ export interface User {
 export interface Group {
   id: string;
   name: string;
-  access: 'ANY' | 'MUNICIPAL_SPHERE' | 'STATE_SPHERE' | 'CITIES';
+  access: AccessType;
   cities: City[];
 }
+
+export type AccessType = 'ANY' | 'MUNICIPAL_SPHERE' | 'STATE_SPHERE' | 'CITIES';
 
 export interface City {
   id: string;
