@@ -62,7 +62,7 @@ const CardGrid: React.FC<CardGridProps> = ({ statistics, data }) => {
             id="empenhados"
             title={{
               count: statistics.total.count,
-              label: 'convênios empenhados',
+              label: 'convênios no total',
             }}
             value={statistics.total.value}
             onClick={handleOpenCardDialog}

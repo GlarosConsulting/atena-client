@@ -74,6 +74,12 @@ const Dashboard: React.FC = () => {
     completedContracts: { count: 0, value: 0 },
     topTenOrgans: [],
     counterpart: { financial: 0, assetsAndServices: 0, empty: 0 },
+    trimesters: {
+      '0': 0,
+      '1': 0,
+      '2': 0,
+      '3': 0,
+    },
   });
   const [data, setData] = useState<{ [key: string]: any }>();
   const [cities, setCities] = useState<City[]>([]);

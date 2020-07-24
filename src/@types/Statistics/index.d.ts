@@ -7,6 +7,7 @@ export default interface Statistics {
   completedContracts: StatisticsItem;
   topTenOrgans: TopTenOrganItem[];
   counterpart: CounterpartItem;
+  trimesters: Trimesters;
 }
 
 export interface StatisticsItem {
@@ -24,4 +25,11 @@ export interface CounterpartItem {
   financial: number;
   assetsAndServices: number;
   empty: number;
+}
+
+interface Trimesters {
+  0: number;
+  1: number;
+  2: number;
+  3: number;
 }

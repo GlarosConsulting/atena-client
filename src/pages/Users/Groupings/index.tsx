@@ -188,7 +188,10 @@ const Groupings: React.FC<GroupingsProps> = ({ ...rest }) => {
             const requestData = {
               name: newData.name,
               access: newData.access,
-              cityIds: newData.cities.map(city => city.id),
+              cityIds:
+                newData.cities && newData.cities.length > 0
+                  ? newData.cities.map(city => city.id)
+                  : undefined,
             };
 
             try {
