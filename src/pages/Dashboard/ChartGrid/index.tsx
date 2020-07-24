@@ -36,6 +36,8 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: lighten(theme.palette.primary.light, 0.6),
     borderRadius: 10,
     height: '100%',
+    maxHeight: 302,
+    overflowY: 'auto',
     transition: 'all 200ms ease',
     '&:hover': {
       boxShadow: theme.shadows[5],
