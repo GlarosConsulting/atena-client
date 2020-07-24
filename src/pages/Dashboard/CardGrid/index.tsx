@@ -129,7 +129,10 @@ const CardGrid: React.FC<CardGridProps> = ({ statistics, data }) => {
         open={Boolean(dialog)}
         summary={dialog?.summary}
         agreements={agreements}
-        onClose={(): void => setDialog(null)}
+        onClose={(): void => {
+          setDialog(null);
+          setAgreements([]);
+        }}
       />
     </>
   );
