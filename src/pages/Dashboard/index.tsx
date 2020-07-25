@@ -83,6 +83,7 @@ const Dashboard: React.FC = () => {
   });
   const [data, setData] = useState<{ [key: string]: any }>();
   const [cities, setCities] = useState<City[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = useCallback(() => {
     const newData = {
@@ -97,6 +98,7 @@ const Dashboard: React.FC = () => {
     };
 
     setData(newData);
+    setLoading(true);
 
     api
       .get<AgreementsResponse>('/agreements', {
@@ -104,6 +106,7 @@ const Dashboard: React.FC = () => {
       })
       .then(response => {
         setStatistics(response.data.statistics);
+        setLoading(false);
       });
   }, [date, selectedSphere, selectedCity, user]);
 
@@ -225,6 +228,7 @@ const Dashboard: React.FC = () => {
           />
 
           <ButtonBase
+            disabled={loading}
             onClick={handleSearch}
             style={{
               borderRadius: '50%',
@@ -233,7 +237,7 @@ const Dashboard: React.FC = () => {
               marginRight: 20,
             }}
           >
-            <FaSearch size={20} />
+            <FaSearch size={20} color={loading ? '#AAA' : '#212121'} />
           </ButtonBase>
 
           <Box
