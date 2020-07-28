@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles, lighten } from '@material-ui/core/styles';
+import classNames from 'classnames';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import FadeIn from 'react-fade-in';
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,13 +16,16 @@ import {
   Area,
 } from 'recharts';
 
-import FadeIn from 'react-fade-in';
+import { useSnackbar } from 'notistack';
 import Statistics from '~/@types/Statistics';
+import Agreement from '~/@types/Agreement';
+
 import ProgressBar from './ProgressBar';
 import Text from '~/components/Text';
 
 interface ChartGridProps {
   statistics: Statistics;
+  agreements: Agreement[];
 }
 
 const useStyles = makeStyles(theme => ({
@@ -37,11 +42,14 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
     height: '100%',
     maxHeight: 302,
-    overflowY: 'auto',
     transition: 'all 200ms ease',
     '&:hover': {
       boxShadow: theme.shadows[5],
     },
+  },
+  containerWarning: {
+    border: '2px solid #ef9a9a',
+    boxShadow: theme.shadows[5],
   },
   fadeIn: {
     width: '100%',
@@ -51,8 +59,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const ChartGrid: React.FC<ChartGridProps> = ({ statistics }) => {
+const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
   const classes = useStyles();
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (agreements.length <= 0) return;
+
+    if (
+      statistics.counterpart.financial > 0 ||
+      statistics.counterpart.assetsAndServices > 0
+    )
+      return;
+
+    enqueueSnackbar('Atenção às contrapartidas', { variant: 'warning' });
+  }, [statistics, enqueueSnackbar]); // eslint-disable-line
 
   return (
     <Grid container style={{ marginTop: 10 }}>
@@ -60,7 +82,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics }) => {
         <Paper
           className={classes.container}
           elevation={3}
-          style={{ justifyContent: 'flex-start' }}
+          style={{ justifyContent: 'flex-start', overflowY: 'auto' }}
         >
           <Text fontSize={17} fontWeight="bold" marginY={1.5}>
             Organizações
@@ -90,7 +112,12 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics }) => {
 
       <Grid className={classes.item} item xs={12} md={6} lg={4}>
         <Paper
-          className={classes.container}
+          className={classNames(classes.container, {
+            [classes.containerWarning]:
+              agreements.length > 0 &&
+              statistics.counterpart.financial <= 0 &&
+              statistics.counterpart.assetsAndServices <= 0,
+          })}
           elevation={3}
           style={{ padding: 0 }}
         >

@@ -65,6 +65,7 @@ const Dashboard: React.FC = () => {
     subDays(new Date(), 1),
     new Date(),
   ]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [statistics, setStatistics] = useState<Statistics>({
     total: { count: 0, value: 0 },
     execution: { count: 0, value: 0 },
@@ -105,6 +106,7 @@ const Dashboard: React.FC = () => {
         params: newData,
       })
       .then(response => {
+        setAgreements(response.data.agreements);
         setStatistics(response.data.statistics);
         setLoading(false);
       });
@@ -266,7 +268,7 @@ const Dashboard: React.FC = () => {
       <Container maxWidth="lg">
         <Box marginTop={2.5} marginBottom={2}>
           <CardGrid statistics={statistics} data={data} />
-          <ChartGrid statistics={statistics} />
+          <ChartGrid statistics={statistics} agreements={agreements || []} />
         </Box>
       </Container>
     </>
