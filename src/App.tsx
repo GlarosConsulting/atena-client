@@ -8,7 +8,7 @@ import 'typeface-roboto';
 import './styles/global.css';
 import { light } from './styles/themes';
 
-import AppProvider from './AppProvider';
+import AppProvider from './contexts';
 import Routes from './routes';
 
 const App: React.FC = () => {
