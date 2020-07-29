@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { makeStyles, lighten } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import Grid from '@material-ui/core/Grid';
@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
   },
   containerWarning: {
     border: '2px solid #ef9a9a',
-    boxShadow: theme.shadows[5],
+    boxShadow: theme.shadows[6],
   },
   fadeIn: {
     width: '100%',
@@ -62,19 +62,21 @@ const useStyles = makeStyles(theme => ({
 const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
   const classes = useStyles();
 
+  const couterpartWarning = useMemo(
+    () =>
+      agreements.length > 0 &&
+      statistics.counterpart.financial <= 0 &&
+      statistics.counterpart.assetsAndServices <= 0,
+    [statistics], // eslint-disable-line
+  );
+
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (agreements.length <= 0) return;
-
-    if (
-      statistics.counterpart.financial > 0 ||
-      statistics.counterpart.assetsAndServices > 0
-    )
-      return;
+    if (!couterpartWarning) return;
 
     enqueueSnackbar('Atenção às contrapartidas', { variant: 'warning' });
-  }, [statistics, enqueueSnackbar]); // eslint-disable-line
+  }, [couterpartWarning]); // eslint-disable-line
 
   return (
     <Grid container style={{ marginTop: 10 }}>
@@ -113,10 +115,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
       <Grid className={classes.item} item xs={12} md={6} lg={4}>
         <Paper
           className={classNames(classes.container, {
-            [classes.containerWarning]:
-              agreements.length > 0 &&
-              statistics.counterpart.financial <= 0 &&
-              statistics.counterpart.assetsAndServices <= 0,
+            [classes.containerWarning]: couterpartWarning,
           })}
           elevation={3}
           style={{ padding: 0 }}

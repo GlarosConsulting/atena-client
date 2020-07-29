@@ -65,6 +65,7 @@ export interface Program {
 
 export interface ConvenientExecution {
   executionProcesses: ExecutionProcess[];
+  contracts: Contract[];
 }
 
 export interface ExecutionProcess {
@@ -97,6 +98,30 @@ export interface ExecutionProcess {
     city: string;
     analysisDate: Date;
     accepted: string;
+  };
+}
+
+interface Contract {
+  id: string;
+  convenientExecutionId: string;
+  contractId: string;
+  biddingId: string;
+  date: Date;
+  details: {
+    id: string;
+    contractId: string;
+    hiredDocument: string;
+    hirerDocument: string;
+    type: string;
+    object: string;
+    totalValue: number;
+    publishDate: Date;
+    beginDate: Date;
+    endDate: Date;
+    signDate: Date;
+    executionProcessId: string;
+    biddingModality: string;
+    processId: string;
   };
 }
 

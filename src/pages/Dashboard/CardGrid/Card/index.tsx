@@ -17,6 +17,7 @@ interface CardProps {
   title: TitleObject;
   value: number;
   onClick?: (event: Omit<CardProps, 'onClick'>) => void;
+  className?: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -46,12 +47,18 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Card: React.FC<CardProps> = ({ id = '', title, value, onClick }) => {
+const Card: React.FC<CardProps> = ({
+  id = '',
+  title,
+  value,
+  onClick,
+  className,
+}) => {
   const classes = useStyles();
 
   return (
     <Paper
-      className={classNames(classes.root, {
+      className={classNames(className, classes.root, {
         [classes.hover]: title.count > 0 && Boolean(onClick),
       })}
       elevation={3}
