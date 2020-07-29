@@ -144,6 +144,9 @@ const CardGrid: React.FC<CardGridProps> = ({
       .then(response => {
         setAgreements(response.data.agreements);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }
 

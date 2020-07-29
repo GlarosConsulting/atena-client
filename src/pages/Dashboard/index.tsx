@@ -110,6 +110,9 @@ const Dashboard: React.FC = () => {
         setAgreements(response.data.agreements);
         setStatistics(response.data.statistics);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }, [date, selectedSphere, selectedCity, user]);
 
