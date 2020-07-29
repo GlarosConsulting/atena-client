@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import Grid from '@material-ui/core/Grid';
 
 import { useSnackbar } from 'notistack';
-import { isBefore } from 'date-fns';
+
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
@@ -95,17 +95,11 @@ const CardGrid: React.FC<CardGridProps> = ({
     if (_agreements.length <= 0) return;
 
     const agreementIds = _agreements
-      .filter(
-        agreement =>
-          agreement.convenientExecution?.contracts.some(contract =>
-            contract.details?.endDate
-              ? isBefore(contract.details?.endDate, new Date())
-              : true,
-          ) &&
-          containsCaseInsensitive(
-            agreement.accountability.data.status,
-            'Enviada para Análise',
-          ),
+      .filter(agreement =>
+        containsCaseInsensitive(
+          agreement.accountability.data.status,
+          'Enviada para Análise',
+        ),
       )
       .map(agreement => agreement.id);
 
