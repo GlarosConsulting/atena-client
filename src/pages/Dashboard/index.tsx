@@ -18,15 +18,16 @@ import { FaSearch } from 'react-icons/fa';
 
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
+import { City } from '~/@types/Session';
 
 import { useAuthentication } from '~/contexts/authentication';
 import api from '~/services/api';
 
+import Loading from '~/components/Loading';
 import Header from '~/components/Header';
 
 import CardGrid from './CardGrid';
 import ChartGrid from './ChartGrid';
-import { City } from '~/@types/Session';
 
 interface AgreementsResponse {
   statistics: Statistics;
@@ -129,6 +130,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
+      <Loading open={loading} />
+
       <Header>
         <Box
           display="flex"
@@ -267,7 +270,11 @@ const Dashboard: React.FC = () => {
 
       <Container maxWidth="lg">
         <Box marginTop={2.5} marginBottom={2}>
-          <CardGrid statistics={statistics} data={data} />
+          <CardGrid
+            statistics={statistics}
+            agreements={agreements || []}
+            data={data}
+          />
           <ChartGrid statistics={statistics} agreements={agreements || []} />
         </Box>
       </Container>
