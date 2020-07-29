@@ -19,9 +19,10 @@ import InfoDialog from './InfoDialog';
 
 interface TableProps {
   data: Agreement[];
+  errors: string[];
 }
 
-const Table: React.FC<TableProps> = ({ data }) => {
+const Table: React.FC<TableProps> = ({ data, errors }) => {
   const theme = useTheme();
   const tableTheme = createMuiTheme({
     ...theme,
@@ -70,6 +71,13 @@ const Table: React.FC<TableProps> = ({ data }) => {
         ),
         headerStyle: { maxWidth: 100 },
       },
+      {
+        title: '',
+        render: row =>
+          errors.includes(row.id) ? (
+            <Box width={15} height={15} borderRadius="50%" bgcolor="#f44336" />
+          ) : null,
+      },
       { title: 'Convênio', field: 'agreementId' },
       { title: 'Orgão', field: 'name', headerStyle: { minWidth: 175 } },
       { title: 'Situação', field: 'status', headerStyle: { minWidth: 175 } },
@@ -91,7 +99,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
       },
       { title: 'Programa', field: 'program', cellStyle: { minWidth: 500 } },
     ],
-    [],
+    [errors],
   );
 
   return (

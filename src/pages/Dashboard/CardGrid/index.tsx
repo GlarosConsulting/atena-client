@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import capitalize from 'capitalize';
 import classNames from 'classnames';
@@ -58,64 +58,87 @@ const CardGrid: React.FC<CardGridProps> = ({
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const finishedBiddingsWarning = useMemo(
-    () =>
-      _agreements.length > 0 &&
-      _agreements
-        .filter(agreement =>
+  const [errors, setErrors] = useState<string[]>([]);
+  const [erroredFinishedBiddings, setErroredFinishedBiddings] = useState<
+    string[]
+  >([]);
+  const [erroredFinishedContracts, setErroredFinishedContracts] = useState<
+    string[]
+  >([]);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (_agreements.length <= 0) return;
+
+    const agreementIds = _agreements
+      .filter(
+        agreement =>
           agreement.convenientExecution?.executionProcesses.some(
             executionProcess =>
               containsCaseInsensitive(
                 executionProcess.details?.executionProcess,
                 'Licitação',
               ),
-          ),
-        )
-        .some(agreement =>
+          ) &&
           agreement.convenientExecution?.executionProcesses.some(
             executionProcess =>
               containsCaseInsensitive(executionProcess.accepted, 'Rejeitad'),
           ),
-        ),
-    [_agreements],
-  );
-  const finishedContractsWarning = useMemo(
-    () =>
-      _agreements.length > 0 &&
-      _agreements
-        .filter(agreement =>
+      )
+      .map(agreement => agreement.id);
+
+    setErroredFinishedBiddings(agreementIds);
+  }, [_agreements]);
+
+  useEffect(() => {
+    if (_agreements.length <= 0) return;
+
+    const agreementIds = _agreements
+      .filter(
+        agreement =>
           agreement.convenientExecution?.contracts.some(contract =>
             contract.details?.endDate
               ? isBefore(contract.details?.endDate, new Date())
               : true,
-          ),
-        )
-        .some(agreement =>
+          ) &&
           containsCaseInsensitive(
             agreement.accountability.data.status,
-            'Rejeitad',
+            'Enviada para Análise',
           ),
-        ),
-    [_agreements],
-  );
+      )
+      .map(agreement => agreement.id);
 
-  const { enqueueSnackbar } = useSnackbar();
+    setErroredFinishedContracts(agreementIds);
+  }, [_agreements]);
 
   useEffect(() => {
-    if (!finishedBiddingsWarning) return;
+    if (erroredFinishedBiddings.length <= 0) return;
 
     enqueueSnackbar('Atenção às licitações concluídas', { variant: 'warning' });
-  }, [finishedBiddingsWarning]); // eslint-disable-line
+  }, [erroredFinishedBiddings]); // eslint-disable-line
 
   useEffect(() => {
-    if (!finishedContractsWarning) return;
+    if (erroredFinishedContracts.length <= 0) return;
 
     enqueueSnackbar('Atenção aos contratos concluídos', { variant: 'warning' });
-  }, [finishedContractsWarning]); // eslint-disable-line
+  }, [erroredFinishedContracts]); // eslint-disable-line
 
   function handleOpenCardDialog({ id, title }: any): void {
     setDialog({ summary: capitalize(title.label) });
     setLoading(true);
+
+    switch (id) {
+      case 'licitacoes-concluidas':
+        setErrors(erroredFinishedBiddings);
+        break;
+      case 'contratos-concluidos':
+        setErrors(erroredFinishedContracts);
+        break;
+      default:
+        setErrors([]);
+        break;
+    }
 
     api
       .get<AgreementsResponse>('/agreements', {
@@ -180,7 +203,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
             className={classNames({
-              [classes.containerWarning]: finishedBiddingsWarning,
+              [classes.containerWarning]: erroredFinishedBiddings.length > 0,
             })}
             id="licitacoes-concluidas"
             title={{
@@ -194,7 +217,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
             className={classNames({
-              [classes.containerWarning]: finishedContractsWarning,
+              [classes.containerWarning]: erroredFinishedContracts.length > 0,
             })}
             id="contratos-concluidos"
             title={{
@@ -213,6 +236,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         open={Boolean(dialog)}
         summary={dialog?.summary}
         agreements={agreements}
+        errors={errors}
         onClose={(): void => {
           setDialog(null);
           setAgreements([]);

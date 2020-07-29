@@ -14,6 +14,7 @@ interface CardDialogProps {
   open: boolean;
   summary?: string;
   agreements: Agreement[];
+  errors: string[];
   onClose: () => void;
 }
 
@@ -32,6 +33,7 @@ const CardDialog: React.FC<CardDialogProps> = ({
   open,
   summary,
   agreements,
+  errors,
   onClose,
 }) => {
   const classes = useStyles();
@@ -46,7 +48,7 @@ const CardDialog: React.FC<CardDialogProps> = ({
           </Paper>
         )}
 
-        <Table data={agreements} />
+        <Table data={agreements} errors={errors} />
       </DialogContent>
     </Dialog>
   );
