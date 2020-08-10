@@ -67,28 +67,42 @@ let theme = createMuiTheme({
         }
       },
     },
-    MuiPickersDesktopDateRangeCalendar: {
-      dateRangeContainer: {
-        marginTop: 10
-      }
-    },
-    MuiPickersCalendar: {
-      week: {
-        '& > .MuiPickersDateRangeDay-rangeIntervalDayHighlight': {
-          backgroundColor: '#AAA',
-          '& span[class*="dayLabel"]': {
-            color: '#FFF'
-          }
-        }
-      }
-    },
     MuiPickersArrowSwitcher: {
       iconButton: {
         backgroundColor: '#DDD'
       }
     },
+    MuiPickersDesktopDateRangeCalendar: {
+      rangeCalendarContainer: {
+        marginTop: 10
+      },
+      calendar: {
+        '& .MuiPickersDateRangeDay-rangeIntervalDayHighlightStart button.Mui-selected': {
+          backgroundColor: '#707070'
+        },
+        '& .MuiPickersDateRangeDay-rangeIntervalDayHighlightEnd button.Mui-selected': {
+          backgroundColor: '#707070'
+        }
+      }
+    },
+    MuiPickersCalendar: {
+      root: {
+        '& .MuiPickersDateRangeDay-rangeIntervalDayHighlight': {
+          backgroundColor: '#AAA',
+          '& span[class*="dayLabel"]': {
+            color: '#FFF'
+          }
+        },
+      },
+    },
     MuiPickersDay: {
-      daySelected: {
+      root: {
+        '&.Mui-selected': {
+          backgroundColor: '#707070',
+          color: '#FFF'
+        }
+      },
+      selected: {
         backgroundColor: '#707070'
       },
     },

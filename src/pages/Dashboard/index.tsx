@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import subDays from 'date-fns/subDays'; // eslint-disable-line
@@ -10,12 +10,14 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import Button from '@material-ui/core/Button';
 import { DateRangePicker, DateRange } from '@material-ui/pickers';
 import DateFnsAdapter from '@material-ui/pickers/adapter/date-fns';
 import ptBrLocale from 'date-fns/locale/pt-BR'; // eslint-disable-line
 import { FiArrowRight, FiLogOut } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 
+import { MuiPickersAdapter } from '@material-ui/pickers/_shared/hooks/useUtils';
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 import { City } from '~/@types/Session';
@@ -25,7 +27,9 @@ import api from '~/services/api';
 
 import Loading from '~/components/Loading';
 import Header from '~/components/Header';
+import Text from '~/components/Text';
 
+import FilterDialog, { Filters } from './FilterDialog';
 import CardGrid from './CardGrid';
 import ChartGrid from './ChartGrid';
 
@@ -51,6 +55,12 @@ const useStyles = makeStyles(theme => ({
   dateRangeInputField: {
     maxWidth: 150,
   },
+  filterButton: {
+    padding: theme.spacing(1, 2),
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: 25,
+    },
+  },
 }));
 
 const Dashboard: React.FC = () => {
@@ -58,14 +68,18 @@ const Dashboard: React.FC = () => {
 
   const { user, signOut, hasAccess } = useAuthentication();
 
+  const [cities, setCities] = useState<City[]>([]);
+
   const [selectedCity, setSelectedCity] = useState('Todos');
   const [selectedSphere, setSelectedSphere] = useState(
     hasAccess(['ANY', 'MUNICIPAL_SPHERE', 'CITIES']) ? 'Municipal' : 'Estadual',
   );
-  const [date, setDate] = useState<DateRange>([
+  const [date, setDate] = useState<DateRange<Date | null>>([
     subDays(new Date(), 1),
     new Date(),
   ]);
+  const [filters, setFilters] = useState<Filters>({});
+
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [statistics, setStatistics] = useState<Statistics>({
     total: { count: 0, value: 0 },
@@ -83,12 +97,12 @@ const Dashboard: React.FC = () => {
       '3': 0,
     },
   });
-  const [data, setData] = useState<{ [key: string]: any }>();
-  const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = useCallback(() => {
-    const newData = {
+  const [isFilterDialogOpened, setIsFilterDialogOpened] = useState(false);
+
+  const data = useMemo(
+    () => ({
       UF: 'AL',
       beginDate: date[0],
       endDate: date[1],
@@ -97,24 +111,24 @@ const Dashboard: React.FC = () => {
         selectedCity !== 'Todos' && selectedSphere === 'Municipal'
           ? selectedCity
           : user?.group?.cities.map(city => city.id),
-    };
+    }),
+    [date, selectedSphere, selectedCity, user],
+  );
 
-    setData(newData);
-    setLoading(true);
+  const handleSearch = useCallback(() => {
+    setIsLoading(true);
 
     api
-      .get<AgreementsResponse>('/agreements', {
-        params: newData,
-      })
+      .post<AgreementsResponse>('filters', { filters }, { params: data })
       .then(response => {
         setAgreements(response.data.agreements);
         setStatistics(response.data.statistics);
-        setLoading(false);
+        setIsLoading(false);
       })
       .catch(() => {
-        setLoading(false);
+        setIsLoading(false);
       });
-  }, [date, selectedSphere, selectedCity, user]);
+  }, [filters, data]);
 
   useEffect(() => {
     handleSearch();
@@ -133,7 +147,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <Loading open={loading} />
+      <Loading open={isLoading} />
 
       <Header>
         <Box
@@ -212,7 +226,11 @@ const Dashboard: React.FC = () => {
             startText="Início"
             endText="Fim"
             value={date}
-            dateAdapter={new DateFnsAdapter({ locale: ptBrLocale })}
+            dateAdapter={
+              (new DateFnsAdapter({
+                locale: ptBrLocale,
+              }) as unknown) as MuiPickersAdapter<DateRange<Date | null>>
+            }
             renderInput={(startProps, endProps): React.ReactElement => (
               <Box
                 className={classes.fieldResponsiveContainer}
@@ -235,39 +253,52 @@ const Dashboard: React.FC = () => {
             onChange={(value): void => setDate(value)}
           />
 
-          <ButtonBase
-            disabled={loading}
-            onClick={handleSearch}
-            style={{
-              borderRadius: '50%',
-              padding: 10,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          >
-            <FaSearch size={20} color={loading ? '#AAA' : '#212121'} />
-          </ButtonBase>
+          <Box display="flex" alignItems="center" marginTop={{ xs: 2, sm: 0 }}>
+            <Button
+              className={classes.filterButton}
+              disabled={isLoading}
+              variant="contained"
+              onClick={() => setIsFilterDialogOpened(true)}
+            >
+              <Text fontSize={16} fontWeight="bold">
+                FILTRAR
+              </Text>
+            </Button>
 
-          <Box
-            bgcolor="#707070"
-            height={25}
-            width={3}
-            borderRadius={50}
-            marginX={0.5}
-            display={{ xs: 'none', sm: 'block' }}
-          />
+            <ButtonBase
+              disabled={isLoading}
+              onClick={handleSearch}
+              style={{
+                borderRadius: '50%',
+                padding: 10,
+                marginLeft: 20,
+                marginRight: 20,
+              }}
+            >
+              <FaSearch size={20} color={isLoading ? '#AAA' : '#212121'} />
+            </ButtonBase>
 
-          <ButtonBase
-            onClick={() => signOut()}
-            style={{
-              borderRadius: '50%',
-              padding: 10,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          >
-            <FiLogOut size={20} />
-          </ButtonBase>
+            <Box
+              bgcolor="#707070"
+              height={25}
+              width={3}
+              borderRadius={50}
+              marginX={0.5}
+              display={{ xs: 'none', sm: 'block' }}
+            />
+
+            <Box marginX={{ xs: 0, sm: 2 }}>
+              <ButtonBase
+                onClick={() => signOut()}
+                style={{
+                  borderRadius: '50%',
+                  padding: 10,
+                }}
+              >
+                <FiLogOut size={20} />
+              </ButtonBase>
+            </Box>
+          </Box>
         </Box>
       </Header>
 
@@ -281,6 +312,13 @@ const Dashboard: React.FC = () => {
           <ChartGrid statistics={statistics} agreements={agreements || []} />
         </Box>
       </Container>
+
+      <FilterDialog
+        open={isFilterDialogOpened}
+        data={data}
+        onChange={value => setFilters(value)}
+        onClose={() => setIsFilterDialogOpened(false)}
+      />
     </>
   );
 };
