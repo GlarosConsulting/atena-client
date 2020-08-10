@@ -57,7 +57,7 @@ const Users: React.FC = () => {
               className={classes.title}
               fontSize={21}
               fontWeight="bold"
-              color="#808080"
+              color="#EEE"
               marginLeft={0.5}
             >
               Usuários
@@ -69,7 +69,7 @@ const Users: React.FC = () => {
               className={classes.title}
               fontSize={21}
               fontWeight="bold"
-              color="#808080"
+              color="#EEE"
               marginLeft={0.5}
             >
               Agrupamentos

@@ -45,8 +45,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
   expandButton: {
-    // color: '#303030',
-    // padding: 5,
     padding: theme.spacing(0.65, 1.25),
     backgroundColor: darken(theme.palette.primary.light, 0.1),
     borderRadius: 10,
@@ -62,7 +60,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
 }) => {
   const classes = useStyles();
 
-  const [expanded, setExpanded] = useState<string | null>();
+  const [expanded, setExpanded] = useState<string>();
 
   const [program, setProgram] = useState<Program | null>();
   const [
@@ -93,33 +91,11 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                 onClick={(): void =>
                   expanded !== 'celebration'
                     ? setExpanded('celebration')
-                    : setExpanded(null)
+                    : setExpanded(undefined)
                 }
               >
                 {expanded === 'celebration' ? 'Mostrar menos' : 'Mostrar mais'}
               </Button>
-
-              {/* <IconButton
-              aria-label="close"
-              className={classes.expandButton}
-              onClick={(): void =>
-                expanded !== 'celebration'
-                  ? setExpanded('celebration')
-                  : setExpanded(null)
-              }
-            >
-              <FiChevronDown
-                size={23}
-                strokeWidth={4}
-                style={{
-                  transition: 'all 200ms',
-                  transform:
-                    expanded === 'celebration'
-                      ? 'rotate(180deg)'
-                      : 'rotate(0deg)',
-                }}
-              />
-            </IconButton> */}
             </Box>
 
             <Collapse
@@ -250,33 +226,11 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                 onClick={(): void =>
                   expanded !== 'execution'
                     ? setExpanded('execution')
-                    : setExpanded(null)
+                    : setExpanded(undefined)
                 }
               >
                 {expanded === 'execution' ? 'Mostrar menos' : 'Mostrar mais'}
               </Button>
-
-              {/* <IconButton
-              aria-label="close"
-              className={classes.expandButton}
-              onClick={(): void =>
-                expanded !== 'execution'
-                  ? setExpanded('execution')
-                  : setExpanded(null)
-              }
-            >
-              <FiChevronDown
-                size={23}
-                strokeWidth={4}
-                style={{
-                  transition: 'all 200ms',
-                  transform:
-                    expanded === 'execution'
-                      ? 'rotate(180deg)'
-                      : 'rotate(0deg)',
-                }}
-              />
-            </IconButton> */}
             </Box>
 
             <Collapse
@@ -348,35 +302,13 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                 onClick={(): void =>
                   expanded !== 'accountability'
                     ? setExpanded('accountability')
-                    : setExpanded(null)
+                    : setExpanded(undefined)
                 }
               >
                 {expanded === 'accountability'
                   ? 'Mostrar menos'
                   : 'Mostrar mais'}
               </Button>
-
-              {/* <IconButton
-              aria-label="close"
-              className={classes.expandButton}
-              onClick={(): void =>
-                expanded !== 'accountability'
-                  ? setExpanded('accountability')
-                  : setExpanded(null)
-              }
-            >
-              <FiChevronDown
-                size={23}
-                strokeWidth={4}
-                style={{
-                  transition: 'all 200ms',
-                  transform:
-                    expanded === 'accountability'
-                      ? 'rotate(180deg)'
-                      : 'rotate(0deg)',
-                }}
-              />
-            </IconButton> */}
             </Box>
 
             <Collapse
