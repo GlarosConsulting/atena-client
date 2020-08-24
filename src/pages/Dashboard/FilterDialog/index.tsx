@@ -11,6 +11,7 @@ import Button from '@material-ui/core/Button';
 import { LocalizationProvider } from '@material-ui/pickers';
 import DateFnsAdapter from '@material-ui/pickers/adapter/date-fns';
 
+import { DateRange } from '@material-ui/pickers/DateRangePicker/RangeTypes';
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
@@ -25,7 +26,9 @@ import Text from '~/components/Text';
 import Loading from '~/components/Loading';
 
 import Input from './Input';
-import Date from '~/pages/Dashboard/FilterDialog/Date';
+import InputRange from './InputRange';
+import Select from './Select';
+import Date from './Date';
 
 interface InfoDialogProps {
   open: boolean;
@@ -34,24 +37,26 @@ interface InfoDialogProps {
   onClose: () => void;
 }
 
+type ValueRange = [string, string];
+
 export interface Filters {
   celebration?: {
     agreementId?: string;
     modality?: string;
     processId?: string;
     proposalId?: string;
-    proposalDate?: Date;
-    biddingDate?: Date;
-    homologationDate?: Date;
+    proposalDate?: DateRange<Date>;
+    biddingDate?: DateRange<Date>;
+    homologationDate?: DateRange<Date>;
     legalFoundation?: string;
-    value?: string;
+    value?: ValueRange;
     description?: string;
     object?: string;
   };
   execution?: {
     executionId?: string;
     type?: string;
-    date?: Date;
+    date?: DateRange<Date>;
     processId?: string;
     status?: string;
     systemStatus?: string;
@@ -65,12 +70,12 @@ export interface Filters {
     modality?: string;
     status?: string;
     number?: string;
-    validity?: string;
-    limitDate?: Date;
-    totalValue?: string;
-    transferValue?: string;
-    counterpartValue?: string;
-    yieldValue?: string;
+    validity?: DateRange<Date>;
+    limitDate?: DateRange<Date>;
+    totalValue?: ValueRange;
+    transferValue?: ValueRange;
+    counterpartValue?: ValueRange;
+    yieldValue?: ValueRange;
   };
 }
 
@@ -114,7 +119,9 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
 
   const handleUpdateFilters = useCallback(
     (value: {
-      [parent: string]: { [id: string]: string | Date | null | undefined };
+      [parent: string]: {
+        [id: string]: string | DateRange<Date> | ValueRange | null | undefined;
+      };
     }) => {
       let newFilters = merge(filters, value) as Filters;
 
@@ -147,6 +154,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
     [filters, onChange],
   );
 
+  const handleClear = useCallback(() => {
+    setFilters({});
+
+    if (onChange) onChange({});
+  }, [onChange]);
+
   const handleCheck = useCallback(() => {
     console.log(filters);
 
@@ -162,7 +175,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
 
   return (
     <>
-      <Dialog open={open} responsive maxWidth="sm" fullWidth onClose={onClose}>
+      <Dialog open={open} responsive maxWidth="md" fullWidth onClose={onClose}>
         <DialogTitle onClose={onClose}>Filtrar</DialogTitle>
         <DialogContent dividers>
           <LocalizationProvider
@@ -210,11 +223,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.celebration?.agreementId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Select
                   parent="celebration"
                   id="modality"
                   title="Modalidade"
                   value={filters.celebration?.modality}
+                  options={['Contrato de Repasse']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -259,7 +273,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.celebration?.legalFoundation}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="celebration"
                   id="value"
                   title="Valor"
@@ -322,11 +336,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.executionId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Select
                   parent="execution"
                   id="type"
                   title="Tipo"
                   value={filters.execution?.type}
+                  options={['Tipo']}
                   onChange={handleUpdateFilters}
                 />
                 <Date
@@ -343,11 +358,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.processId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Select
                   parent="execution"
                   id="status"
                   title="Situação"
                   value={filters.execution?.status}
+                  options={['Situação']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -429,18 +445,20 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.documentNumber}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Select
                   parent="accountability"
                   id="modality"
                   title="Modalidade"
                   value={filters.accountability?.modality}
+                  options={['Modalidade']}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Select
                   parent="accountability"
                   id="status"
                   title="Situação"
                   value={filters.accountability?.status}
+                  options={['Situação']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -450,7 +468,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.number}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Date
                   parent="accountability"
                   id="validity"
                   title="Vigência"
@@ -464,28 +482,28 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.limitDate}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="totalValue"
                   title="Valor total"
                   value={filters.accountability?.totalValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="transferValue"
                   title="Valor do repasse"
                   value={filters.accountability?.transferValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="counterpartValue"
                   title="Valor de contrapartida"
                   value={filters.accountability?.counterpartValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="yieldValue"
                   title="Valor de rendimento"
@@ -502,7 +520,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
             {`${agreements.length} convênios encontrados`}
           </Text>
 
-          <DialogButton variant="outlined" onClick={() => setFilters({})}>
+          <DialogButton variant="outlined" onClick={handleClear}>
             <Text fontSize={17} fontWeight={800} color="#777">
               LIMPAR
             </Text>

@@ -8,7 +8,7 @@ import Text from '~/components/Text';
 interface ProgressBarProps {
   className?: string;
   title: string;
-  value: number;
+  value: string;
   percentage: number;
 }
 

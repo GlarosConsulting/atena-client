@@ -84,18 +84,12 @@ const Dashboard: React.FC = () => {
   const [statistics, setStatistics] = useState<Statistics>({
     total: { count: 0, value: 0 },
     execution: { count: 0, value: 0 },
-    transfer: { count: 0, value: 0 },
-    transferInExecution: { count: 0, value: 0 },
-    completedBiddings: { count: 0, value: 0 },
-    completedContracts: { count: 0, value: 0 },
+    pending: { count: 0, value: 0 },
+    interrupted: { count: 0, value: 0 },
+    procedures: { count: 0, value: 0 },
+    completed: { count: 0, value: 0 },
     topTenOrgans: [],
     counterpart: { financial: 0, assetsAndServices: 0, empty: 0 },
-    trimesters: {
-      '0': 0,
-      '1': 0,
-      '2': 0,
-      '3': 0,
-    },
   });
   const [isLoading, setIsLoading] = useState(false);
 

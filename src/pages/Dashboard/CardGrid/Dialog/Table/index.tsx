@@ -71,13 +71,6 @@ const Table: React.FC<TableProps> = ({ data, errors }) => {
         ),
         headerStyle: { maxWidth: 100 },
       },
-      {
-        title: '',
-        render: row =>
-          errors.includes(row.id) ? (
-            <Box width={15} height={15} borderRadius="50%" bgcolor="#f44336" />
-          ) : null,
-      },
       { title: 'Convênio', field: 'agreementId' },
       { title: 'Orgão', field: 'name', headerStyle: { minWidth: 175 } },
       { title: 'Situação', field: 'status', headerStyle: { minWidth: 175 } },
@@ -99,7 +92,7 @@ const Table: React.FC<TableProps> = ({ data, errors }) => {
       },
       { title: 'Programa', field: 'program', cellStyle: { minWidth: 500 } },
     ],
-    [errors],
+    [],
   );
 
   return (
@@ -109,6 +102,15 @@ const Table: React.FC<TableProps> = ({ data, errors }) => {
           title=""
           columns={columns}
           data={data}
+          options={{
+            rowStyle: rowData => {
+              if (!errors.includes(rowData.id)) return {};
+
+              return {
+                background: '#ef9a9a',
+              };
+            },
+          }}
           localization={{
             toolbar: {
               searchPlaceholder: 'Pesquisar',

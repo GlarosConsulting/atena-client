@@ -65,15 +65,15 @@ const Card: React.FC<CardProps> = ({
       onClick={(): void => onClick && onClick({ id, title, value })}
     >
       <Box textAlign="center">
-        <Text fontSize={15} fontWeight="bold">
+        <Text fontSize={14} fontWeight="bold">
           <CountUp end={title.count} />
         </Text>
-        <Text fontSize={15} style={{ textTransform: 'uppercase' }}>
+        <Text fontSize={14} style={{ textTransform: 'uppercase' }}>
           {` ${title.label}`}
         </Text>
       </Box>
 
-      <Text fontSize={16} fontWeight="bold" textAlign="center">
+      <Text fontSize={15} fontWeight="bold" textAlign="center">
         <CountUp
           end={value}
           useEasing

@@ -1,13 +1,12 @@
 export default interface Statistics {
   total: StatisticsItem;
   execution: StatisticsItem;
-  transfer: StatisticsItem;
-  transferInExecution: StatisticsItem;
-  completedBiddings: StatisticsItem;
-  completedContracts: StatisticsItem;
+  pending: StatisticsItem;
+  interrupted: StatisticsItem;
+  procedures: StatisticsItem;
+  completed: StatisticsItem;
   topTenOrgans: TopTenOrganItem[];
   counterpart: CounterpartItem;
-  trimesters: Trimesters;
 }
 
 export interface StatisticsItem {
@@ -17,7 +16,7 @@ export interface StatisticsItem {
 
 export interface TopTenOrganItem {
   name: string;
-  count: number;
+  value: number;
   percentage: number;
 }
 
@@ -27,9 +26,8 @@ export interface CounterpartItem {
   empty: number;
 }
 
-interface Trimesters {
-  0: number;
-  1: number;
-  2: number;
-  3: number;
+export interface PendingAgreement {
+  name: string;
+  value: number;
+  percentage: number;
 }
