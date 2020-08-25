@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FiTrash2, FiArrowRight } from 'react-icons/fi';
 
 import ptBrLocale from 'date-fns/locale/pt-BR'; // eslint-disable-line
@@ -56,9 +56,19 @@ const Date: React.FC<DateProps> = ({
 }) => {
   const classes = useStyles();
 
+  const [date, setDate] = useState<DateRange<Date>>(value);
+
   const handleChange = useCallback(
-    (data: DateRange<Date>) => {
-      if (onChange) onChange({ [parent]: { [id]: data } });
+    (newDate: DateRange<Date>) => {
+      setDate(newDate);
+
+      let newValue: any = newDate;
+
+      if (!newValue[0] && !newValue[1]) {
+        newValue = undefined;
+      }
+
+      if (onChange) onChange({ [parent]: { [id]: newValue } });
     },
     [onChange, parent, id],
   );
@@ -72,7 +82,7 @@ const Date: React.FC<DateProps> = ({
       <DateRangePicker
         startText="Início"
         endText="Fim"
-        value={value}
+        value={date}
         dateAdapter={
           (new DateFnsAdapter({
             locale: ptBrLocale,
@@ -97,7 +107,7 @@ const Date: React.FC<DateProps> = ({
             />
           </Box>
         )}
-        onChange={date => handleChange(date)}
+        onChange={newDate => handleChange(newDate)}
       />
 
       <ButtonBase

@@ -214,7 +214,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
             className={classNames({
-              [classes.containerWarning]: true,
+              [classes.containerWarning]: erroredFinishedContracts.length > 0,
             })}
             id="concluidas"
             title={{

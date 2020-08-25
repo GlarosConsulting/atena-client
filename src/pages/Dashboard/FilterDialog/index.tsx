@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 
-import merge from 'lodash/merge';
+import _ from 'lodash';
 import ptBrLocale from 'date-fns/locale/pt-BR';
 
 import { makeStyles, darken } from '@material-ui/core/styles';
@@ -27,7 +27,7 @@ import Loading from '~/components/Loading';
 
 import Input from './Input';
 import InputRange from './InputRange';
-import Select from './Select';
+import MuiSelect from './Select';
 import Date from './Date';
 
 interface InfoDialogProps {
@@ -123,29 +123,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
         [id: string]: string | DateRange<Date> | ValueRange | null | undefined;
       };
     }) => {
-      let newFilters = merge(filters, value) as Filters;
-
-      function cleanEmptyValues<T>(_object: T) {
-        const object: { [key: string]: any } = { ..._object };
-
-        Object.keys(_object).forEach(_key => {
-          const key = _key;
-          const val = object[key];
-
-          try {
-            if (val && typeof val === 'object' && !(val instanceof Date)) {
-              object[key] = cleanEmptyValues(val);
-              return;
-            }
-          } catch {} // eslint-disable-line
-
-          if (!val) delete object[key];
-        });
-
-        return object;
-      }
-
-      newFilters = cleanEmptyValues(newFilters);
+      const newFilters = _.assign(filters, value) as Filters;
 
       setFilters(newFilters);
 
@@ -161,8 +139,6 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
   }, [onChange]);
 
   const handleCheck = useCallback(() => {
-    console.log(filters);
-
     setIsLoading(true);
 
     api
@@ -223,7 +199,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.celebration?.agreementId}
                   onChange={handleUpdateFilters}
                 />
-                <Select
+                <MuiSelect
                   parent="celebration"
                   id="modality"
                   title="Modalidade"
@@ -336,7 +312,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.executionId}
                   onChange={handleUpdateFilters}
                 />
-                <Select
+                <MuiSelect
                   parent="execution"
                   id="type"
                   title="Tipo"
@@ -358,7 +334,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.processId}
                   onChange={handleUpdateFilters}
                 />
-                <Select
+                <MuiSelect
                   parent="execution"
                   id="status"
                   title="Situação"
@@ -445,7 +421,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.documentNumber}
                   onChange={handleUpdateFilters}
                 />
-                <Select
+                <MuiSelect
                   parent="accountability"
                   id="modality"
                   title="Modalidade"
@@ -453,7 +429,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   options={['Modalidade']}
                   onChange={handleUpdateFilters}
                 />
-                <Select
+                <MuiSelect
                   parent="accountability"
                   id="status"
                   title="Situação"

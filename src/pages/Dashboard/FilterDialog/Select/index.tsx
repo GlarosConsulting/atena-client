@@ -1,7 +1,12 @@
 import React from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, FormControl, Select, MenuItem } from '@material-ui/core';
+import {
+  Box,
+  FormControl,
+  Select as MuiSelect,
+  MenuItem,
+} from '@material-ui/core';
 
 import Text from '~/components/Text';
 
@@ -30,7 +35,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Input: React.FC<InputProps> = ({
+const Select: React.FC<InputProps> = ({
   parent,
   id,
   title,
@@ -47,7 +52,7 @@ const Input: React.FC<InputProps> = ({
         {`${title}: `}
       </Text>
       <FormControl variant="outlined" className={classes.formControl}>
-        <Select
+        <MuiSelect
           id={`${id}-outlined`}
           value={value}
           onChange={event =>
@@ -60,10 +65,10 @@ const Input: React.FC<InputProps> = ({
           {options.map(option => (
             <MenuItem value={option}>{option}</MenuItem>
           ))}
-        </Select>
+        </MuiSelect>
       </FormControl>
     </Box>
   );
 };
 
-export default Input;
+export default Select;

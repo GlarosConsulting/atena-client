@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { makeStyles, darken } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 
@@ -13,7 +13,7 @@ interface InputProps {
   title: string;
   value?: [string, string];
   onChange: (value: {
-    [parent: string]: { [id: string]: [string, string] };
+    [parent: string]: { [id: string]: [string, string] | undefined };
   }) => void;
   style?: React.CSSProperties;
 }
@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Input: React.FC<InputProps> = ({
+const InputRange: React.FC<InputProps> = ({
   parent,
   id,
   title,
@@ -45,6 +45,19 @@ const Input: React.FC<InputProps> = ({
   ...rest
 }) => {
   const classes = useStyles();
+
+  const handleChange = useCallback(
+    (data: [string, string]) => {
+      let newValue: any = data;
+
+      if (!newValue[0] && !newValue[1]) {
+        newValue = undefined;
+      }
+
+      if (onChange) onChange({ [parent]: { [id]: newValue } });
+    },
+    [id, onChange, parent],
+  );
 
   return (
     <Box display="flex" alignItems="center" marginBottom={0.6} {...rest}>
@@ -56,9 +69,7 @@ const Input: React.FC<InputProps> = ({
         className={classes.input}
         type="text"
         value={value[0]}
-        onChange={event =>
-          onChange({ [parent]: { [id]: [event.target.value, value[1]] } })
-        }
+        onChange={event => handleChange([event.target.value, value[1]])}
       />
 
       <FiArrowRight size={25} style={{ margin: '0 10px' }} />
@@ -67,12 +78,10 @@ const Input: React.FC<InputProps> = ({
         className={classes.input}
         type="text"
         value={value[1]}
-        onChange={event =>
-          onChange({ [parent]: { [id]: [value[0], event.target.value] } })
-        }
+        onChange={event => handleChange([value[0], event.target.value])}
       />
     </Box>
   );
 };
 
-export default Input;
+export default InputRange;
