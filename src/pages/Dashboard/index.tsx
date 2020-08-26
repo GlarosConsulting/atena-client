@@ -79,6 +79,7 @@ const Dashboard: React.FC = () => {
     new Date(),
   ]);
   const [filters, setFilters] = useState<Filters>({});
+  const [isActiveOnlyAlerts, setIsActiveOnlyAlerts] = useState(false);
 
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [statistics, setStatistics] = useState<Statistics>({
@@ -105,15 +106,24 @@ const Dashboard: React.FC = () => {
         selectedCity !== 'Todos' && selectedSphere === 'Municipal'
           ? selectedCity
           : user?.group?.cities.map(city => city.id),
+      onlyAlerts: isActiveOnlyAlerts,
     }),
-    [date, selectedSphere, selectedCity, user],
+    [date, selectedSphere, selectedCity, user, isActiveOnlyAlerts],
   );
 
   const handleSearch = useCallback(() => {
     setIsLoading(true);
 
     api
-      .post<AgreementsResponse>('filters', { filters }, { params: data })
+      .post<AgreementsResponse>(
+        'filters',
+        {
+          filters,
+        },
+        {
+          params: data,
+        },
+      )
       .then(response => {
         setAgreements(response.data.agreements);
         setStatistics(response.data.statistics);
@@ -311,6 +321,7 @@ const Dashboard: React.FC = () => {
         open={isFilterDialogOpened}
         data={data}
         onChange={value => setFilters(value)}
+        onToggleOnlyAlerts={value => setIsActiveOnlyAlerts(value)}
         onClose={() => setIsFilterDialogOpened(false)}
       />
     </>

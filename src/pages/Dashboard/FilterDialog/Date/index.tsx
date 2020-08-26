@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FiTrash2, FiArrowRight } from 'react-icons/fi';
 
 import ptBrLocale from 'date-fns/locale/pt-BR'; // eslint-disable-line

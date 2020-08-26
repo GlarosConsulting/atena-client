@@ -8,6 +8,7 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import Button from '@material-ui/core/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { LocalizationProvider } from '@material-ui/pickers';
 import DateFnsAdapter from '@material-ui/pickers/adapter/date-fns';
 
@@ -29,12 +30,14 @@ import Input from './Input';
 import InputRange from './InputRange';
 import MuiSelect from './Select';
 import Date from './Date';
+import Switch from '~/components/Switch';
 
 interface InfoDialogProps {
   open: boolean;
   data: object;
-  onChange?: (filters: Filters) => void;
-  onClose: () => void;
+  onChange(filters: Filters): void;
+  onToggleOnlyAlerts(active: boolean): void;
+  onClose(): void;
 }
 
 type ValueRange = [string, string];
@@ -100,12 +103,16 @@ const useStyles = makeStyles(theme => ({
     fontSize: 12,
     color: darken(theme.palette.primary.light, 0.65),
   },
+  switchLabel: {
+    marginRight: 6,
+  },
 }));
 
 const FilterDialog: React.FC<InfoDialogProps> = ({
   open,
   data,
   onChange,
+  onToggleOnlyAlerts,
   onClose,
 }) => {
   const classes = useStyles();
@@ -113,6 +120,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
   const [expanded, setExpanded] = useState<string>();
 
   const [filters, setFilters] = useState<Filters>({});
+  const [isActiveOnlyAlerts, setOnlyAlerts] = useState(false);
 
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,22 +135,38 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
 
       setFilters(newFilters);
 
-      if (onChange) onChange(newFilters);
+      onChange(newFilters);
     },
     [filters, onChange],
   );
 
+  const handleToggleOnlyAlerts = useCallback(() => {
+    const newValue = !isActiveOnlyAlerts;
+
+    setOnlyAlerts(newValue);
+
+    onToggleOnlyAlerts(newValue);
+  }, [isActiveOnlyAlerts, onToggleOnlyAlerts]);
+
   const handleClear = useCallback(() => {
     setFilters({});
 
-    if (onChange) onChange({});
+    onChange({});
   }, [onChange]);
 
   const handleCheck = useCallback(() => {
     setIsLoading(true);
 
     api
-      .post<FiltersResponse>('filters', { filters }, { params: data })
+      .post<FiltersResponse>(
+        'filters',
+        {
+          filters,
+        },
+        {
+          params: data,
+        },
+      )
       .then(response => {
         setAgreements(response.data.agreements);
         setIsLoading(false);
@@ -496,6 +520,20 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
             {`${agreements.length} convênios encontrados`}
           </Text>
 
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isActiveOnlyAlerts}
+                onChange={handleToggleOnlyAlerts}
+              />
+            }
+            label="Apenas alertas"
+            labelPlacement="start"
+            classes={{
+              label: classes.switchLabel,
+            }}
+            style={{ marginRight: 8 }}
+          />
           <DialogButton variant="outlined" onClick={handleClear}>
             <Text fontSize={17} fontWeight={800} color="#777">
               LIMPAR
