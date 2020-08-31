@@ -115,15 +115,7 @@ const Dashboard: React.FC = () => {
     setIsLoading(true);
 
     api
-      .post<AgreementsResponse>(
-        'filters',
-        {
-          filters,
-        },
-        {
-          params: data,
-        },
-      )
+      .post<AgreementsResponse>('filters', { filters }, { params: data })
       .then(response => {
         setAgreements(response.data.agreements);
         setStatistics(response.data.statistics);

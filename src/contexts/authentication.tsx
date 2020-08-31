@@ -72,12 +72,17 @@ const AuthenticationProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (!isSignedIn()) return;
 
-    api.get<User>(`users/${data.user.id}`).then(response => {
-      setData({
-        ...data,
-        user: response.data,
+    api
+      .get<User>(`users/${data.user.id}`)
+      .then(response => {
+        setData({
+          ...data,
+          user: response.data,
+        });
+      })
+      .catch(() => {
+        setData({} as Session);
       });
-    });
   }, [location]); // eslint-disable-line
 
   return (

@@ -158,15 +158,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
     setIsLoading(true);
 
     api
-      .post<FiltersResponse>(
-        'filters',
-        {
-          filters,
-        },
-        {
-          params: data,
-        },
-      )
+      .post<FiltersResponse>('filters', { filters }, { params: data })
       .then(response => {
         setAgreements(response.data.agreements);
         setIsLoading(false);
@@ -521,12 +513,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
           </Text>
 
           <FormControlLabel
-            control={
+            control={(
               <Switch
                 checked={isActiveOnlyAlerts}
                 onChange={handleToggleOnlyAlerts}
               />
-            }
+            )}
             label="Apenas alertas"
             labelPlacement="start"
             classes={{
