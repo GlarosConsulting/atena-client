@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 
-import merge from 'lodash/merge';
+import _ from 'lodash';
 import ptBrLocale from 'date-fns/locale/pt-BR';
 
 import { makeStyles, darken } from '@material-ui/core/styles';
@@ -8,9 +8,11 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import Button from '@material-ui/core/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { LocalizationProvider } from '@material-ui/pickers';
 import DateFnsAdapter from '@material-ui/pickers/adapter/date-fns';
 
+import { DateRange } from '@material-ui/pickers/DateRangePicker/RangeTypes';
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
@@ -25,14 +27,20 @@ import Text from '~/components/Text';
 import Loading from '~/components/Loading';
 
 import Input from './Input';
-import Date from '~/pages/Dashboard/FilterDialog/Date';
+import InputRange from './InputRange';
+import MuiSelect from './Select';
+import Date from './Date';
+import Switch from '~/components/Switch';
 
 interface InfoDialogProps {
   open: boolean;
   data: object;
-  onChange?: (filters: Filters) => void;
-  onClose: () => void;
+  onChange(filters: Filters): void;
+  onToggleOnlyAlerts(active: boolean): void;
+  onClose(): void;
 }
+
+type ValueRange = [string, string];
 
 export interface Filters {
   celebration?: {
@@ -40,18 +48,18 @@ export interface Filters {
     modality?: string;
     processId?: string;
     proposalId?: string;
-    proposalDate?: Date;
-    biddingDate?: Date;
-    homologationDate?: Date;
+    proposalDate?: DateRange<Date>;
+    biddingDate?: DateRange<Date>;
+    homologationDate?: DateRange<Date>;
     legalFoundation?: string;
-    value?: string;
+    value?: ValueRange;
     description?: string;
     object?: string;
   };
   execution?: {
     executionId?: string;
     type?: string;
-    date?: Date;
+    date?: DateRange<Date>;
     processId?: string;
     status?: string;
     systemStatus?: string;
@@ -65,12 +73,12 @@ export interface Filters {
     modality?: string;
     status?: string;
     number?: string;
-    validity?: string;
-    limitDate?: Date;
-    totalValue?: string;
-    transferValue?: string;
-    counterpartValue?: string;
-    yieldValue?: string;
+    validity?: DateRange<Date>;
+    limitDate?: DateRange<Date>;
+    totalValue?: ValueRange;
+    transferValue?: ValueRange;
+    counterpartValue?: ValueRange;
+    yieldValue?: ValueRange;
   };
 }
 
@@ -95,12 +103,16 @@ const useStyles = makeStyles(theme => ({
     fontSize: 12,
     color: darken(theme.palette.primary.light, 0.65),
   },
+  switchLabel: {
+    marginRight: 6,
+  },
 }));
 
 const FilterDialog: React.FC<InfoDialogProps> = ({
   open,
   data,
   onChange,
+  onToggleOnlyAlerts,
   onClose,
 }) => {
   const classes = useStyles();
@@ -108,48 +120,41 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
   const [expanded, setExpanded] = useState<string>();
 
   const [filters, setFilters] = useState<Filters>({});
+  const [isActiveOnlyAlerts, setOnlyAlerts] = useState(false);
 
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdateFilters = useCallback(
     (value: {
-      [parent: string]: { [id: string]: string | Date | null | undefined };
+      [parent: string]: {
+        [id: string]: string | DateRange<Date> | ValueRange | null | undefined;
+      };
     }) => {
-      let newFilters = merge(filters, value) as Filters;
-
-      function cleanEmptyValues<T>(_object: T) {
-        const object: { [key: string]: any } = { ..._object };
-
-        Object.keys(_object).forEach(_key => {
-          const key = _key;
-          const val = object[key];
-
-          try {
-            if (val && typeof val === 'object' && !(val instanceof Date)) {
-              object[key] = cleanEmptyValues(val);
-              return;
-            }
-          } catch {} // eslint-disable-line
-
-          if (!val) delete object[key];
-        });
-
-        return object;
-      }
-
-      newFilters = cleanEmptyValues(newFilters);
+      const newFilters = _.assign(filters, value) as Filters;
 
       setFilters(newFilters);
 
-      if (onChange) onChange(newFilters);
+      onChange(newFilters);
     },
     [filters, onChange],
   );
 
-  const handleCheck = useCallback(() => {
-    console.log(filters);
+  const handleToggleOnlyAlerts = useCallback(() => {
+    const newValue = !isActiveOnlyAlerts;
 
+    setOnlyAlerts(newValue);
+
+    onToggleOnlyAlerts(newValue);
+  }, [isActiveOnlyAlerts, onToggleOnlyAlerts]);
+
+  const handleClear = useCallback(() => {
+    setFilters({});
+
+    onChange({});
+  }, [onChange]);
+
+  const handleCheck = useCallback(() => {
     setIsLoading(true);
 
     api
@@ -162,7 +167,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
 
   return (
     <>
-      <Dialog open={open} responsive maxWidth="sm" fullWidth onClose={onClose}>
+      <Dialog open={open} responsive maxWidth="md" fullWidth onClose={onClose}>
         <DialogTitle onClose={onClose}>Filtrar</DialogTitle>
         <DialogContent dividers>
           <LocalizationProvider
@@ -210,11 +215,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.celebration?.agreementId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <MuiSelect
                   parent="celebration"
                   id="modality"
                   title="Modalidade"
                   value={filters.celebration?.modality}
+                  options={['Contrato de Repasse']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -259,7 +265,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.celebration?.legalFoundation}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="celebration"
                   id="value"
                   title="Valor"
@@ -322,11 +328,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.executionId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <MuiSelect
                   parent="execution"
                   id="type"
                   title="Tipo"
                   value={filters.execution?.type}
+                  options={['Tipo']}
                   onChange={handleUpdateFilters}
                 />
                 <Date
@@ -343,11 +350,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.execution?.processId}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <MuiSelect
                   parent="execution"
                   id="status"
                   title="Situação"
                   value={filters.execution?.status}
+                  options={['Situação']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -429,18 +437,20 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.documentNumber}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <MuiSelect
                   parent="accountability"
                   id="modality"
                   title="Modalidade"
                   value={filters.accountability?.modality}
+                  options={['Modalidade']}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <MuiSelect
                   parent="accountability"
                   id="status"
                   title="Situação"
                   value={filters.accountability?.status}
+                  options={['Situação']}
                   onChange={handleUpdateFilters}
                 />
                 <Input
@@ -450,7 +460,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.number}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <Date
                   parent="accountability"
                   id="validity"
                   title="Vigência"
@@ -464,28 +474,28 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   value={filters.accountability?.limitDate}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="totalValue"
                   title="Valor total"
                   value={filters.accountability?.totalValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="transferValue"
                   title="Valor do repasse"
                   value={filters.accountability?.transferValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="counterpartValue"
                   title="Valor de contrapartida"
                   value={filters.accountability?.counterpartValue}
                   onChange={handleUpdateFilters}
                 />
-                <Input
+                <InputRange
                   parent="accountability"
                   id="yieldValue"
                   title="Valor de rendimento"
@@ -502,7 +512,21 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
             {`${agreements.length} convênios encontrados`}
           </Text>
 
-          <DialogButton variant="outlined" onClick={() => setFilters({})}>
+          <FormControlLabel
+            control={(
+              <Switch
+                checked={isActiveOnlyAlerts}
+                onChange={handleToggleOnlyAlerts}
+              />
+            )}
+            label="Apenas alertas"
+            labelPlacement="start"
+            classes={{
+              label: classes.switchLabel,
+            }}
+            style={{ marginRight: 8 }}
+          />
+          <DialogButton variant="outlined" onClick={handleClear}>
             <Text fontSize={17} fontWeight={800} color="#777">
               LIMPAR
             </Text>

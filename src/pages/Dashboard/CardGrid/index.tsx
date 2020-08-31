@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1),
   },
   containerWarning: {
-    border: '2px solid #ef9a9a',
+    background: '#ef9a9a',
     boxShadow: theme.shadows[6],
   },
   dialogContentSummary: {
@@ -123,10 +123,10 @@ const CardGrid: React.FC<CardGridProps> = ({
     setLoading(true);
 
     switch (id) {
-      case 'licitacoes-concluidas':
+      case 'procedimentos':
         setErrors(erroredFinishedBiddings);
         break;
-      case 'contratos-concluidos':
+      case 'concluidas':
         setErrors(erroredFinishedContracts);
         break;
       default:
@@ -158,7 +158,7 @@ const CardGrid: React.FC<CardGridProps> = ({
             id="empenhados"
             title={{
               count: statistics.total.count,
-              label: 'convênios no total',
+              label: 'transferências voluntárias',
             }}
             value={statistics.total.value}
             onClick={handleOpenCardDialog}
@@ -169,7 +169,7 @@ const CardGrid: React.FC<CardGridProps> = ({
             id="execucao"
             title={{
               count: statistics.execution.count,
-              label: 'convênios em execução',
+              label: 'transferências voluntárias em execução',
             }}
             value={statistics.execution.value}
             onClick={handleOpenCardDialog}
@@ -177,23 +177,23 @@ const CardGrid: React.FC<CardGridProps> = ({
         </Grid>
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
-            id="contratos-repasse"
+            id="pendencias-negativadas"
             title={{
-              count: statistics.transfer.count,
-              label: 'contratos de repasse',
+              count: statistics.pending.count,
+              label: 'transferências voluntárias com pendências ou negativadas',
             }}
-            value={statistics.transfer.value}
+            value={statistics.pending.value}
             onClick={handleOpenCardDialog}
           />
         </Grid>
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
-            id="contratos-repasse-execucao"
+            id="interrompidas"
             title={{
-              count: statistics.transferInExecution.count,
-              label: 'contratos de repasse em execução',
+              count: statistics.interrupted.count,
+              label: 'transferências voluntárias interrompidas',
             }}
-            value={statistics.transferInExecution.value}
+            value={statistics.interrupted.value}
             onClick={handleOpenCardDialog}
           />
         </Grid>
@@ -202,12 +202,12 @@ const CardGrid: React.FC<CardGridProps> = ({
             className={classNames({
               [classes.containerWarning]: erroredFinishedBiddings.length > 0,
             })}
-            id="licitacoes-concluidas"
+            id="procedimentos"
             title={{
-              count: statistics.completedBiddings.count,
-              label: 'licitações concluídas',
+              count: statistics.procedures.count,
+              label: 'procedimentos licitatórios',
             }}
-            value={statistics.completedBiddings.value}
+            value={statistics.procedures.value}
             onClick={handleOpenCardDialog}
           />
         </Grid>
@@ -216,12 +216,12 @@ const CardGrid: React.FC<CardGridProps> = ({
             className={classNames({
               [classes.containerWarning]: erroredFinishedContracts.length > 0,
             })}
-            id="contratos-concluidos"
+            id="concluidas"
             title={{
-              count: statistics.completedContracts.count,
-              label: 'contratos concluídos',
+              count: statistics.completed.count,
+              label: 'transferências voluntárias concluídas no período',
             }}
-            value={statistics.completedContracts.value}
+            value={statistics.completed.value}
             onClick={handleOpenCardDialog}
           />
         </Grid>

@@ -37,7 +37,7 @@
     "date-fns": "^2.15.0",
     "date-fns-tz": "^1.0.10",
     "history": "^5.0.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.20",
     "material-table": "^1.65.0",
     "notistack": "^0.9.17",
     "react": "^16.13.1",

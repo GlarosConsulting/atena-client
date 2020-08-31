@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { makeStyles, lighten } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import Grid from '@material-ui/core/Grid';
@@ -8,20 +8,19 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  AreaChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Area,
 } from 'recharts';
 
 import { useSnackbar } from 'notistack';
-import Statistics from '~/@types/Statistics';
+import Statistics, { PendingAgreement } from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
 import ProgressBar from './ProgressBar';
 import Text from '~/components/Text';
+import api from '~/services/api';
 
 interface ChartGridProps {
   statistics: Statistics;
@@ -62,7 +61,11 @@ const useStyles = makeStyles(theme => ({
 const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
   const classes = useStyles();
 
-  const couterpartWarning = useMemo(
+  const [topPendingAgreements, setTopPendingAgreements] = useState<
+    PendingAgreement[]
+  >([]);
+
+  const counterpartWarning = useMemo(
     () =>
       agreements.length > 0 &&
       statistics.counterpart.financial <= 0 &&
@@ -73,10 +76,16 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (!couterpartWarning) return;
+    if (!counterpartWarning) return;
 
     enqueueSnackbar('Atenção às contrapartidas', { variant: 'warning' });
-  }, [couterpartWarning]); // eslint-disable-line
+  }, [counterpartWarning]); // eslint-disable-line
+
+  useEffect(() => {
+    api.get('agreements/pending').then(response => {
+      setTopPendingAgreements(response.data);
+    });
+  }, []);
 
   return (
     <Grid container style={{ marginTop: 10 }}>
@@ -87,7 +96,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
           style={{ justifyContent: 'flex-start', overflowY: 'auto' }}
         >
           <Text fontSize={17} fontWeight="bold" marginY={1.5}>
-            Organizações
+            Transferências voluntárias por concedente
           </Text>
 
           {statistics.topTenOrgans.length > 0 ? (
@@ -95,7 +104,10 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
               <FadeIn className={classes.fadeIn}>
                 <ProgressBar
                   title={organ.name}
-                  value={organ.count}
+                  value={Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(organ.value)}
                   percentage={organ.percentage}
                 />
               </FadeIn>
@@ -104,7 +116,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
             <FadeIn className={classes.fadeIn}>
               <ProgressBar
                 title="Nenhuma informação"
-                value={0}
+                value="-"
                 percentage={0}
               />
             </FadeIn>
@@ -115,7 +127,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
       <Grid className={classes.item} item xs={12} md={6} lg={4}>
         <Paper
           className={classNames(classes.container, {
-            [classes.containerWarning]: couterpartWarning,
+            [classes.containerWarning]: counterpartWarning,
           })}
           elevation={3}
           style={{ padding: 0 }}
@@ -131,24 +143,38 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
               data={[
                 {
                   name: 'Financeira',
-                  convenios: statistics.counterpart.financial,
+                  valor: statistics.counterpart.financial,
                 },
                 {
                   name: 'Bens e serviços',
-                  convenios: statistics.counterpart.assetsAndServices,
+                  valor: statistics.counterpart.assetsAndServices,
                 },
                 {
                   name: 'Nenhuma',
-                  convenios: statistics.counterpart.empty,
+                  valor: statistics.counterpart.empty,
                 },
               ]}
-              margin={{ top: 0, right: 45, left: 0, bottom: 10 }}
+              margin={{ top: 0, right: 40, left: 20, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="convenios" fill="#8884d8" />
+              <YAxis
+                tickFormatter={value => {
+                  return Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(value as number);
+                }}
+              />
+              <Tooltip
+                formatter={value => {
+                  return Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(value as number);
+                }}
+              />
+              <Bar dataKey="valor" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
         </Paper>
@@ -158,55 +184,34 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
         <Paper
           className={classes.container}
           elevation={3}
-          style={{ padding: 0 }}
+          style={{ justifyContent: 'flex-start', overflowY: 'auto' }}
         >
           <Text fontSize={17} fontWeight="bold" marginY={1.5}>
-            Trimestres
+            Prestações de conta em atraso
           </Text>
 
-          <ResponsiveContainer height={250}>
-            <AreaChart
-              data={[
-                {
-                  name: '1º',
-                  convenios: statistics.trimesters[0] || 0,
-                },
-                {
-                  name: '2º',
-                  convenios: statistics.trimesters[1] || 0,
-                },
-                {
-                  name: '3º',
-                  convenios: statistics.trimesters[2] || 0,
-                },
-                {
-                  name: '4º',
-                  convenios: statistics.trimesters[3] || 0,
-                },
-              ]}
-              margin={{ top: 0, right: 45, left: 0, bottom: 10 }}
-            >
-              <defs>
-                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-
-              <XAxis dataKey="name" />
-              <YAxis />
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="convenios"
-                stroke="#8884d8"
-                fillOpacity={1}
-                fill="url(#colorUv)"
+          {topPendingAgreements.length > 0 ? (
+            topPendingAgreements.map(pendingAgreement => (
+              <FadeIn className={classes.fadeIn}>
+                <ProgressBar
+                  title={pendingAgreement.name}
+                  value={Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(pendingAgreement.value)}
+                  percentage={pendingAgreement.percentage}
+                />
+              </FadeIn>
+            ))
+          ) : (
+            <FadeIn className={classes.fadeIn}>
+              <ProgressBar
+                title="Nenhuma informação"
+                value="-"
+                percentage={0}
               />
-            </AreaChart>
-          </ResponsiveContainer>
+            </FadeIn>
+          )}
         </Paper>
       </Grid>
     </Grid>
