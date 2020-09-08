@@ -131,9 +131,9 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
         [id: string]: string | DateRange<Date> | ValueRange | null | undefined;
       };
     }) => {
-      const newFilters = _.assign(filters, value) as Filters;
+      const newFilters = _.merge(filters, value) as Filters;
 
-      setFilters(newFilters);
+      setFilters({ ...newFilters });
 
       onChange(newFilters);
     },
@@ -513,12 +513,12 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
           </Text>
 
           <FormControlLabel
-            control={(
+            control={
               <Switch
                 checked={isActiveOnlyAlerts}
                 onChange={handleToggleOnlyAlerts}
               />
-            )}
+            }
             label="Apenas alertas"
             labelPlacement="start"
             classes={{
