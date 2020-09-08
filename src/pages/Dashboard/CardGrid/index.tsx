@@ -15,10 +15,12 @@ import Loading from '~/components/Loading';
 
 import Card from './Card';
 import CardDialog from './Dialog';
+import { Filters } from '~/pages/Dashboard/FilterDialog';
 
 interface CardGridProps {
   statistics: Statistics;
   agreements: Agreement[];
+  filters?: Filters;
   data?: { [key: string]: any };
 }
 
@@ -50,6 +52,7 @@ function containsCaseInsensitive(str: string | null, value: string): boolean {
 const CardGrid: React.FC<CardGridProps> = ({
   statistics,
   agreements: _agreements,
+  filters,
   data,
 }) => {
   const classes = useStyles();
@@ -135,12 +138,16 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
 
     api
-      .get<AgreementsResponse>('/agreements', {
-        params: {
-          ...data,
-          customFilter: id,
+      .post<AgreementsResponse>(
+        'filters',
+        { filters },
+        {
+          params: {
+            ...data,
+            customFilter: id,
+          },
         },
-      })
+      )
       .then(response => {
         setAgreements(response.data.agreements);
         setLoading(false);
