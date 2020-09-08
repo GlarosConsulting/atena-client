@@ -303,6 +303,7 @@ const Dashboard: React.FC = () => {
           <CardGrid
             statistics={statistics}
             agreements={agreements || []}
+            filters={filters}
             data={data}
           />
           <ChartGrid statistics={statistics} agreements={agreements || []} />
