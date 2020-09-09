@@ -128,7 +128,9 @@ const List: React.FC<ListProps> = ({ ...rest }) => {
 
               setData([...data, newData]);
             } catch (err) {
-              const statusCode = err.response.status as number;
+              const statusCode = (err.response
+                ? err.response.status
+                : 200) as number;
 
               if (statusCode === 409) {
                 const error = (err.response.data.error as string).toLowerCase();

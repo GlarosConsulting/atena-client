@@ -33,7 +33,7 @@ const ProgramDetailsDialog: React.FC<ProgramDetailsDialogProps> = ({
           title="Tipo de compra"
           value={executionProcess.details.buyType}
         />
-        <Label title="Situação" value={executionProcess.details.status} />
+        <Label title="Situação" value={executionProcess?.details?.status} />
         <Label title="Modalidade" value={executionProcess.details.modality} />
         <Label
           title="Tipo de licitação"

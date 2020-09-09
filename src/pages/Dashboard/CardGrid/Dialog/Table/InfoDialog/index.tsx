@@ -263,7 +263,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
                           <TableCell>{el.type}</TableCell>
                           <TableCell>{formatDate(el.date)}</TableCell>
                           <TableCell>{el.processId}</TableCell>
-                          <TableCell>{el.status}</TableCell>
+                          <TableCell>{el?.status}</TableCell>
                           <TableCell>{el.systemStatus}</TableCell>
                           <TableCell>{el.system}</TableCell>
                           <TableCell>{el.accepted}</TableCell>
@@ -336,7 +336,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
               />
               <Label
                 title="Situação"
-                value={agreement.accountability.data.status}
+                value={agreement?.accountability?.data?.status}
               />
               <Label
                 title="Número"
