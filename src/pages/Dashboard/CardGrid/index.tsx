@@ -6,6 +6,7 @@ import Grid from '@material-ui/core/Grid';
 
 import { useSnackbar } from 'notistack';
 
+import { isBefore, parse } from 'date-fns';
 import Statistics from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 
@@ -62,12 +63,8 @@ const CardGrid: React.FC<CardGridProps> = ({
   const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState<string[]>([]);
-  const [erroredFinishedBiddings, setErroredFinishedBiddings] = useState<
-    string[]
-  >([]);
-  const [erroredFinishedContracts, setErroredFinishedContracts] = useState<
-    string[]
-  >([]);
+  const [erroredProcedures, setErroredProcedures] = useState<string[]>([]);
+  const [erroredFinished, setErroredFinished] = useState<string[]>([]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -77,13 +74,22 @@ const CardGrid: React.FC<CardGridProps> = ({
     const agreementIds = _agreements
       .filter(
         agreement =>
-          agreement.convenientExecution?.executionProcesses.some(
-            executionProcess =>
-              containsCaseInsensitive(
-                executionProcess.details?.executionProcess,
-                'Licitação',
-              ),
-          ) &&
+          (containsCaseInsensitive(
+            agreement.proposalData?.data?.modality,
+            'Licitação',
+          ) ||
+            containsCaseInsensitive(
+              agreement.proposalData?.data?.modality,
+              'Dispensa',
+            ) ||
+            containsCaseInsensitive(
+              agreement.proposalData?.data?.modality,
+              'Inexigibilidade',
+            ) ||
+            containsCaseInsensitive(
+              agreement.proposalData?.data?.modality,
+              'Subconvênio',
+            )) &&
           agreement.convenientExecution?.executionProcesses.some(
             executionProcess =>
               containsCaseInsensitive(executionProcess.accepted, 'Rejeitad'),
@@ -91,35 +97,47 @@ const CardGrid: React.FC<CardGridProps> = ({
       )
       .map(agreement => agreement.id);
 
-    setErroredFinishedBiddings(agreementIds);
+    setErroredProcedures(agreementIds);
   }, [_agreements]);
 
   useEffect(() => {
     if (_agreements.length <= 0) return;
 
     const agreementIds = _agreements
-      .filter(agreement =>
-        containsCaseInsensitive(
-          agreement?.accountability?.data?.status,
-          'Enviada para Análise',
-        ),
-      )
+      .filter(agreement => {
+        const validity = agreement.accountability?.data?.validity;
+
+        if (!validity) return false;
+
+        const [, endValidityDate] = validity.split(' a ');
+
+        return (
+          isBefore(
+            parse(endValidityDate, 'dd/MM/yyyy', new Date()),
+            new Date(),
+          ) &&
+          containsCaseInsensitive(
+            agreement?.accountability?.data?.status,
+            'Enviada para Análise',
+          )
+        );
+      })
       .map(agreement => agreement.id);
 
-    setErroredFinishedContracts(agreementIds);
+    setErroredFinished(agreementIds);
   }, [_agreements]);
 
   useEffect(() => {
-    if (erroredFinishedBiddings.length <= 0) return;
+    if (erroredProcedures.length <= 0) return;
 
     enqueueSnackbar('Atenção às licitações concluídas', { variant: 'warning' });
-  }, [erroredFinishedBiddings]); // eslint-disable-line
+  }, [erroredProcedures]); // eslint-disable-line
 
   useEffect(() => {
-    if (erroredFinishedContracts.length <= 0) return;
+    if (erroredFinished.length <= 0) return;
 
     enqueueSnackbar('Atenção aos contratos concluídos', { variant: 'warning' });
-  }, [erroredFinishedContracts]); // eslint-disable-line
+  }, [erroredFinished]); // eslint-disable-line
 
   function handleOpenCardDialog({ id, title }: any): void {
     setDialog({ summary: capitalize(title.label) });
@@ -127,10 +145,10 @@ const CardGrid: React.FC<CardGridProps> = ({
 
     switch (id) {
       case 'procedimentos':
-        setErrors(erroredFinishedBiddings);
+        setErrors(erroredProcedures);
         break;
       case 'concluidas':
-        setErrors(erroredFinishedContracts);
+        setErrors(erroredFinished);
         break;
       default:
         setErrors([]);
@@ -207,7 +225,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
             className={classNames({
-              [classes.containerWarning]: erroredFinishedBiddings.length > 0,
+              [classes.containerWarning]: erroredProcedures.length > 0,
             })}
             id="procedimentos"
             title={{
@@ -221,7 +239,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         <Grid className={classes.containerGrid} item xs={6} sm={3} md={2}>
           <Card
             className={classNames({
-              [classes.containerWarning]: erroredFinishedContracts.length > 0,
+              [classes.containerWarning]: erroredFinished.length > 0,
             })}
             id="concluidas"
             title={{
