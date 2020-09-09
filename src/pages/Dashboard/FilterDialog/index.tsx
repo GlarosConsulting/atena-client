@@ -354,7 +354,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   parent="execution"
                   id="status"
                   title="Situação"
-                  value={filters.execution?.status}
+                  value={filters?.execution?.status}
                   options={['Situação']}
                   onChange={handleUpdateFilters}
                 />
@@ -449,7 +449,7 @@ const FilterDialog: React.FC<InfoDialogProps> = ({
                   parent="accountability"
                   id="status"
                   title="Situação"
-                  value={filters.accountability?.status}
+                  value={filters?.accountability?.status}
                   options={['Situação']}
                   onChange={handleUpdateFilters}
                 />

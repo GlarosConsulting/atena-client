@@ -100,7 +100,7 @@ const CardGrid: React.FC<CardGridProps> = ({
     const agreementIds = _agreements
       .filter(agreement =>
         containsCaseInsensitive(
-          agreement.accountability.data.status,
+          agreement?.accountability?.data?.status,
           'Enviada para Análise',
         ),
       )
