@@ -154,7 +154,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
                   valor: statistics.counterpart.empty,
                 },
               ]}
-              margin={{ top: 0, right: 75, left: 20, bottom: 10 }}
+              margin={{ top: 0, right: 40, left: 50, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
