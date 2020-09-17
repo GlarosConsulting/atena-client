@@ -120,33 +120,45 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
               />
               <Label
                 title="Data de publicação"
-                value={format(
-                  utcToZonedTime(
-                    agreement.proposalData.data.proposalDate,
-                    getTimeZone(),
-                  ),
-                  'dd/MM/yyyy',
-                )}
+                value={
+                  agreement?.proposalData?.data?.proposalDate
+                    ? format(
+                        utcToZonedTime(
+                          agreement.proposalData.data.proposalDate,
+                          getTimeZone(),
+                        ),
+                        'dd/MM/yyyy',
+                      )
+                    : undefined
+                }
               />
               <Label
                 title="Data de licitação"
-                value={format(
-                  utcToZonedTime(
-                    agreement.proposalData.data.biddingDate,
-                    getTimeZone(),
-                  ),
-                  'dd/MM/yyyy',
-                )}
+                value={
+                  agreement?.proposalData?.data?.biddingDate
+                    ? format(
+                        utcToZonedTime(
+                          agreement.proposalData.data.biddingDate,
+                          getTimeZone(),
+                        ),
+                        'dd/MM/yyyy',
+                      )
+                    : undefined
+                }
               />
               <Label
                 title="Data de homologação"
-                value={format(
-                  utcToZonedTime(
-                    agreement.proposalData.data.homologationDate,
-                    getTimeZone(),
-                  ),
-                  'dd/MM/yyyy',
-                )}
+                value={
+                  agreement?.proposalData?.data?.proposalDate
+                    ? format(
+                        utcToZonedTime(
+                          agreement.proposalData.data.homologationDate,
+                          getTimeZone(),
+                        ),
+                        'dd/MM/yyyy',
+                      )
+                    : undefined
+                }
               />
               <Label
                 title="Referência legal"
