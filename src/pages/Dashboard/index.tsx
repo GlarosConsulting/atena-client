@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!hasAccess(['ANY', 'MUNICIPAL_SPHERE'])) {
-      setCities(user.group?.cities || []);
+      setCities(user?.group?.cities || []);
       return;
     }
 
