@@ -15,7 +15,7 @@ import Routes from './routes';
 
 const App: React.FC = () => {
   useEffect(() => {
-    ReactGA.initialize('UA-178895843');
+    ReactGA.initialize('UA-178895843-1');
     ReactGA.pageview(window.location.pathname + window.location.search);
   }, []);
 
