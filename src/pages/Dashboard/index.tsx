@@ -18,7 +18,7 @@ import { FiArrowRight, FiLogOut } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 
 import { MuiPickersAdapter } from '@material-ui/pickers/_shared/hooks/useUtils';
-import Statistics from '~/@types/Statistics';
+import Statistics, { PendingAgreement } from '~/@types/Statistics';
 import Agreement from '~/@types/Agreement';
 import { City } from '~/@types/Session';
 
@@ -36,6 +36,7 @@ import ChartGrid from './ChartGrid';
 interface AgreementsResponse {
   statistics: Statistics;
   agreements: Agreement[];
+  pendingAgreements: PendingAgreement[];
 }
 
 const useStyles = makeStyles(theme => ({
@@ -55,10 +56,19 @@ const useStyles = makeStyles(theme => ({
   dateRangeInputField: {
     maxWidth: 150,
   },
+  searchButton: {
+    borderRadius: '50%',
+    padding: 10,
+    marginLeft: 20,
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 20,
+    },
+  },
   filterButton: {
     padding: theme.spacing(1, 2),
+    marginRight: 20,
     [theme.breakpoints.up('sm')]: {
-      marginLeft: 25,
+      marginLeft: 20,
     },
   },
 }));
@@ -94,6 +104,10 @@ const Dashboard: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  const [topPendingAgreements, setTopPendingAgreements] = useState<
+    PendingAgreement[]
+  >([]);
+
   const [isFilterDialogOpened, setIsFilterDialogOpened] = useState(false);
 
   const data = useMemo(
@@ -111,23 +125,45 @@ const Dashboard: React.FC = () => {
     [date, selectedSphere, selectedCity, user, isActiveOnlyAlerts],
   );
 
-  const handleSearch = useCallback(() => {
-    setIsLoading(true);
+  const handleSearch = useCallback(
+    (_event: any, otherData = {}) => {
+      setIsLoading(true);
 
-    api
-      .post<AgreementsResponse>('filters', { filters }, { params: data })
-      .then(response => {
-        setAgreements(response.data.agreements);
-        setStatistics(response.data.statistics);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-  }, [filters, data]);
+      api
+        .post<AgreementsResponse>(
+          'filters',
+          { filters },
+          { params: { ...data, ...otherData } },
+        )
+        .then(response => {
+          setAgreements(response.data.agreements);
+          setStatistics(response.data.statistics);
+          setTopPendingAgreements(response.data.pendingAgreements);
+
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
+    },
+    [filters, data],
+  );
 
   useEffect(() => {
-    handleSearch();
+    async function init() {
+      const response = await api.get<Agreement>('agreements/oldest');
+
+      const newDate: DateRange<Date | null> = [
+        response.data.proposalData.data.biddingDate,
+        new Date(),
+      ];
+
+      setDate(newDate);
+
+      handleSearch(null, { beginDate: newDate[0] });
+    }
+
+    init();
   }, []); // eslint-disable-line
 
   useEffect(() => {
@@ -250,6 +286,14 @@ const Dashboard: React.FC = () => {
           />
 
           <Box display="flex" alignItems="center" marginTop={{ xs: 2, sm: 0 }}>
+            <ButtonBase
+              className={classes.searchButton}
+              disabled={isLoading}
+              onClick={handleSearch}
+            >
+              <FaSearch size={20} color={isLoading ? '#AAA' : '#212121'} />
+            </ButtonBase>
+
             <Button
               className={classes.filterButton}
               disabled={isLoading}
@@ -257,22 +301,9 @@ const Dashboard: React.FC = () => {
               onClick={() => setIsFilterDialogOpened(true)}
             >
               <Text fontSize={16} fontWeight="bold">
-                FILTRAR
+                + FILTROS
               </Text>
             </Button>
-
-            <ButtonBase
-              disabled={isLoading}
-              onClick={handleSearch}
-              style={{
-                borderRadius: '50%',
-                padding: 10,
-                marginLeft: 20,
-                marginRight: 20,
-              }}
-            >
-              <FaSearch size={20} color={isLoading ? '#AAA' : '#212121'} />
-            </ButtonBase>
 
             <Box
               bgcolor="#707070"
@@ -306,7 +337,11 @@ const Dashboard: React.FC = () => {
             filters={filters}
             data={data}
           />
-          <ChartGrid statistics={statistics} agreements={agreements || []} />
+          <ChartGrid
+            statistics={statistics}
+            agreements={agreements || []}
+            topPendingAgreements={topPendingAgreements}
+          />
         </Box>
       </Container>
 

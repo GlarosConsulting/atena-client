@@ -40,7 +40,7 @@ const CardDialog: React.FC<CardDialogProps> = ({
 
   return (
     <Dialog open={open} responsive maxWidth="lg" fullWidth onClose={onClose}>
-      <DialogTitle onClose={onClose}>Convênios</DialogTitle>
+      <DialogTitle onClose={onClose}>{summary}</DialogTitle>
       <DialogContent dividers>
         {summary && (
           <Paper className={classes.summary} elevation={2}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { makeStyles, lighten } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import Grid from '@material-ui/core/Grid';
@@ -20,11 +20,11 @@ import Agreement from '~/@types/Agreement';
 
 import ProgressBar from './ProgressBar';
 import Text from '~/components/Text';
-import api from '~/services/api';
 
 interface ChartGridProps {
   statistics: Statistics;
   agreements: Agreement[];
+  topPendingAgreements: PendingAgreement[];
 }
 
 const useStyles = makeStyles(theme => ({
@@ -58,12 +58,12 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
+const ChartGrid: React.FC<ChartGridProps> = ({
+  statistics,
+  agreements,
+  topPendingAgreements,
+}) => {
   const classes = useStyles();
-
-  const [topPendingAgreements, setTopPendingAgreements] = useState<
-    PendingAgreement[]
-  >([]);
 
   const counterpartWarning = useMemo(
     () =>
@@ -80,12 +80,6 @@ const ChartGrid: React.FC<ChartGridProps> = ({ statistics, agreements }) => {
 
     enqueueSnackbar('Atenção às contrapartidas', { variant: 'warning' });
   }, [counterpartWarning]); // eslint-disable-line
-
-  useEffect(() => {
-    api.get('agreements/pending').then(response => {
-      setTopPendingAgreements(response.data);
-    });
-  }, []);
 
   return (
     <Grid container style={{ marginTop: 10 }}>
