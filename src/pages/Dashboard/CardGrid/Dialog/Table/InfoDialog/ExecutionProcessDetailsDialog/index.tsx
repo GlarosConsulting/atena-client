@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ExecutionProcess } from '~/@types/Agreement';
+import Agreement, { ExecutionProcess } from '~/@types/Agreement';
 
 import Dialog from '~/components/Dialog';
 import DialogTitle from '~/components/Dialog/Title';
@@ -12,12 +12,14 @@ import formatDate from '~/utils/formatDate';
 
 interface ProgramDetailsDialogProps {
   open: boolean;
+  agreement: Agreement;
   executionProcess?: ExecutionProcess | null;
   onClose: () => void;
 }
 
 const ProgramDetailsDialog: React.FC<ProgramDetailsDialogProps> = ({
   open,
+  agreement,
   executionProcess,
   onClose,
 }) => {
@@ -83,6 +85,14 @@ const ProgramDetailsDialog: React.FC<ProgramDetailsDialogProps> = ({
         <Label
           title="Aceite do processo de execução"
           value={executionProcess.details.accepted}
+        />
+        <Label
+          title="CNPJ empresa:"
+          value={
+            agreement.convenientExecution.contracts[0]?.details.hiredDocument?.split(
+              ': ',
+            )[1]
+          }
         />
       </DialogContent>
     </Dialog>

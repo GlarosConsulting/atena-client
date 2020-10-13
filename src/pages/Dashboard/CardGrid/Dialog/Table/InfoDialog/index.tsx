@@ -409,6 +409,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
 
       <ExecutionProcessDetailsDialog
         open={!!executionProcess}
+        agreement={agreement}
         executionProcess={executionProcess}
         onClose={() => setExecutionProcess(null)}
       />
