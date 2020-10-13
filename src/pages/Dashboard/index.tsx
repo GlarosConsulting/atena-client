@@ -102,7 +102,7 @@ const Dashboard: React.FC = () => {
     topTenOrgans: [],
     counterpart: { financial: 0, assetsAndServices: 0, empty: 0 },
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [topPendingAgreements, setTopPendingAgreements] = useState<
     PendingAgreement[]
